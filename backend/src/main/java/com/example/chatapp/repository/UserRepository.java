@@ -20,6 +20,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // Kullanıcı adına göre arama (case-insensitive)
     List<User> findByUsernameContainingIgnoreCase(String username);
     
+    // Kullanıcı adına göre arama (case-insensitive) - belirli bir ID'yi hariç tut
+    List<User> findByUsernameContainingIgnoreCaseAndIdNot(String username, Long userId);
+    
     // Kullanıcı arama (kullanıcı adı, e-posta, isim veya soyad ile)
     List<User> findByUsernameContainingOrEmailContainingOrIsimContainingOrSoyadContaining(
             String username, String email, String isim, String soyad);

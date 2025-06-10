@@ -11,6 +11,7 @@ import TypingIndicator from '../components/TypingIndicator';
 import groupService from '../services/groupService';
 import { addGroupMessageListener, removeGroupMessageListener, sendGroupMessage, joinGroup } from '../services/websocket';
 import '../styles/groupchat.scss';
+import api from '../services/api';
 
 const GroupChat = () => {
   const { groupId } = useParams();
@@ -30,6 +31,11 @@ const GroupChat = () => {
   const [inviteEmail, setInviteEmail] = useState('');
   const [showMediaUploader, setShowMediaUploader] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [searchResults, setSearchResults] = useState([]);
+  const [inviteMessage, setInviteMessage] = useState('');
+  const [inviteError, setInviteError] = useState('');
+  const [inviteUsername, setInviteUsername] = useState('');
   
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
@@ -161,30 +167,29 @@ const GroupChat = () => {
     }
   };
   
-  // Kullanıcıyı gruba davet et
+  // Kullanıcı davet etme fonksiyonu
   const handleInviteUser = async (e) => {
     e.preventDefault();
     
-    if (!inviteEmail.trim()) {
-      showToast('Geçerli bir e-posta adresi gereklidir', 'error');
+    if (!selectedUser) {
+      setInviteError('Lütfen bir kullanıcı seçin');
       return;
     }
     
     try {
       setIsLoading(true);
       
-      // Gerçek uygulamada, e-posta adresinden kullanıcı ID'sini almak için 
-      // bir API çağrısı yapılması gerekebilir
-      const userId = 1; // Örnek kullanıcı ID
+      // Davet etme işlemi - doğru URL ile
+      await groupService.inviteUserToGroup(groupId, selectedUser.id);
       
-      await groupService.inviteUserToGroup(groupId, userId);
-      
-      showToast('Kullanıcı gruba başarıyla davet edildi', 'success');
-      setInviteEmail('');
+      setInviteMessage(`${selectedUser.username} gruba başarıyla davet edildi`);
+      setInviteUsername('');
+      setSelectedUser(null);
+      setSearchResults([]);
       setShowInviteForm(false);
     } catch (error) {
       console.error('Kullanıcı davet edilirken hata:', error);
-      showToast('Kullanıcı davet edilirken bir hata oluştu', 'error');
+      setInviteError('Kullanıcı davet edilirken bir hata oluştu');
     } finally {
       setIsLoading(false);
     }
@@ -234,6 +239,72 @@ const GroupChat = () => {
   // Gruplara geri dön
   const navigateBack = () => {
     navigate('/groups');
+  };
+  
+  // Kullanıcı ara
+  const searchUsers = async (username) => {
+    if (!username.trim() || username.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+
+    try {
+      // Token kontrol ve hazırlama
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('Kullanıcı kimliği doğrulanamadı');
+        setSearchResults([]);
+        return;
+      }
+      
+      console.log('Kullanıcı araması:', username);
+      console.log('Token:', token ? `${token.substring(0, 15)}...` : 'yok');
+      
+      // API servisini kullanarak doğru endpoint'e istek gönder
+      const response = await api.get('/user/users/search', {
+        params: {
+          username: username
+        },
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      console.log("Kullanıcı arama sonuçları:", response.data);
+      setSearchResults(response.data || []);
+    } catch (error) {
+      console.error('Kullanıcı arama hatası:', error.message || error);
+      if (error.response) {
+        console.error('Hata yanıtı:', error.response.status, error.response.data);
+      }
+      setInviteError('Kullanıcılar aranırken bir hata oluştu');
+      setSearchResults([]);
+    }
+  };
+
+  // Kullanıcı adı değiştiğinde ara
+  const handleUsernameChange = (e) => {
+    const value = e.target.value;
+    setInviteUsername(value);
+    setSelectedUser(null);
+    
+    // Debounce ile arama yap
+    if (value.trim().length >= 2) {
+      const handler = setTimeout(() => {
+        searchUsers(value);
+      }, 300);
+      
+      return () => clearTimeout(handler);
+    } else {
+      setSearchResults([]);
+    }
+  };
+  
+  // Kullanıcı seçildiğinde
+  const selectUserForInvite = (user) => {
+    setSelectedUser(user);
+    setInviteUsername(user.username);
+    setSearchResults([]);
   };
   
   return (
@@ -463,16 +534,76 @@ const GroupChat = () => {
                 </button>
               </div>
               <form onSubmit={handleInviteUser}>
+                {inviteMessage && (
+                  <div className="success-message">{inviteMessage}</div>
+                )}
+                {inviteError && (
+                  <div className="error-message">{inviteError}</div>
+                )}
                 <div className="form-group">
-                  <label htmlFor="inviteEmail">E-posta Adresi *</label>
+                  <label htmlFor="inviteUsername">Kullanıcı Adı *</label>
                   <input
-                    type="email"
-                    id="inviteEmail"
-                    value={inviteEmail}
-                    onChange={(e) => setInviteEmail(e.target.value)}
+                    type="text"
+                    id="inviteUsername"
+                    value={inviteUsername}
+                    onChange={handleUsernameChange}
+                    placeholder="Kullanıcı adını yazın..."
+                    autoComplete="off"
                     required
                   />
+                  
+                  {searchResults.length > 0 && !selectedUser && (
+                    <div className="search-results">
+                      {searchResults.map(user => (
+                        <div 
+                          key={user.id} 
+                          className="search-result-item"
+                          onClick={() => selectUserForInvite(user)}
+                        >
+                          <div className="user-avatar">
+                            {user.profileImageUrl ? (
+                              <img src={user.profileImageUrl} alt={user.username} />
+                            ) : (
+                              <div className="default-avatar">
+                                {user.username.charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                          </div>
+                          <div className="user-info">
+                            <span className="username">{user.username}</span>
+                            {user.email && <span className="email">{user.email}</span>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {searchResults.length === 0 && inviteUsername.length >= 2 && (
+                    <div className="no-results">Kullanıcı bulunamadı</div>
+                  )}
                 </div>
+                
+                {selectedUser && (
+                  <div className="selected-user">
+                    <p>Davet edilecek kullanıcı:</p>
+                    <div className="user-details">
+                      <div className="user-avatar">
+                        {selectedUser.profileImageUrl ? (
+                          <img src={selectedUser.profileImageUrl} alt={selectedUser.username} />
+                        ) : (
+                          <div className="default-avatar">
+                            {selectedUser.username.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <div className="user-info">
+                        <span className="username">{selectedUser.username}</span>
+                        {selectedUser.email && <span className="email">{selectedUser.email}</span>}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
                 <div className="form-actions">
                   <button 
                     type="button" 
@@ -484,7 +615,7 @@ const GroupChat = () => {
                   <button 
                     type="submit" 
                     className="submit-btn"
-                    disabled={isLoading}
+                    disabled={isLoading || !selectedUser}
                   >
                     {isLoading ? 'Davet Ediliyor...' : 'Davet Et'}
                   </button>

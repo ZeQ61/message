@@ -171,11 +171,42 @@ const groupService = {
   // Kullanıcıyı gruba davet et
   inviteUserToGroup: async (groupId, userId) => {
     try {
-      // API servisini kullanarak CORS sorunlarını çöz
-      const response = await api.post(`/groups/${groupId}/invite/${userId}`);
+      console.log(`Kullanıcı davet edilmeye çalışılıyor: groupId=${groupId}, userId=${userId}`);
+      
+      // Token kontrol
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('Token bulunamadı!');
+        throw new Error('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
+      }
+      console.log('Token:', token ? `${token.substring(0, 15)}...` : 'yok');
+      
+      // API URL'i ve diğer parametreler
+      const url = `/api/groups/${groupId}/invite/${userId}`;
+      console.log('İstek URL:', url);
+      
+      // Davet etme isteği gönder - Token başlıkta belirtilerek
+      const response = await api.post(url, {}, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log('Davet başarılı:', response.data);
       return response.data;
     } catch (error) {
       console.error('Kullanıcı davet edilirken hata:', error);
+      
+      // Hata detaylarını günlüğe yaz
+      if (error.response) {
+        console.error('Hata yanıtı:', error.response.status, error.response.data);
+        // 401/403 hatası durumunda özel mesaj
+        if (error.response.status === 401 || error.response.status === 403) {
+          throw new Error('Yetkilendirme hatası. Lütfen tekrar giriş yapın.');
+        }
+      }
+      
       throw error;
     }
   },

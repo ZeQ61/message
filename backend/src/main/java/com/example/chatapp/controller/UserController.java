@@ -181,6 +181,43 @@ public class UserController {
         }
     }
 
+    // Kullanıcıları kullanıcı adına göre ara - Genel arama, tüm kullanıcılar
+    @GetMapping("/users/search")
+    public ResponseEntity<?> searchAllUsers(@RequestParam String username, @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            if (userDetails == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Yetkilendirme başarısız"));
+            }
+            
+            String currentUsername = userDetails.getUsername();
+            User currentUser = userService.findByUsername(currentUsername);
+            
+            if (currentUser == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Kullanıcı bulunamadı"));
+            }
+            
+            logger.info("Kullanıcı araması: '{}' tarafından '{}'", currentUsername, username);
+            
+            // Tüm kullanıcılar arasında ara (kendisi hariç)
+            List<User> users = userRepository.findByUsernameContainingIgnoreCaseAndIdNot(username, currentUser.getId());
+            
+            // Kullanıcı bilgilerini DTO olarak döndür
+            return ResponseEntity.ok(users.stream()
+                .map(user -> Map.of(
+                    "id", user.getId(),
+                    "username", user.getUsername(),
+                    "profileImageUrl", user.getProfileImageUrl() != null ? user.getProfileImageUrl() : "",
+                    "email", user.getEmail() != null ? user.getEmail() : ""
+                ))
+                .collect(Collectors.toList()));
+                
+        } catch (Exception e) {
+            logger.error("Kullanıcı araması sırasında hata: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("message", "Arama sırasında bir hata oluştu: " + e.getMessage()));
+        }
+    }
+
     // Kullanıcıları kullanıcı adına göre ara - Sadece arkadaşlar arasında
     @GetMapping("/search")
     public ResponseEntity<?> searchUsers(@RequestParam String username, @AuthenticationPrincipal UserDetails userDetails) {

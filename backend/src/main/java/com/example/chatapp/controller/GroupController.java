@@ -257,10 +257,19 @@ public class GroupController {
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         try {
+            System.out.println("=== INVITE REQUEST RECEIVED ===");
+            System.out.println("Group ID: " + groupId);
+            System.out.println("User ID to invite: " + userId);
+            System.out.println("Request by: " + userDetails.getUsername());
+            
             User currentUser = userService.findByUsername(userDetails.getUsername());
-            GroupInvitation invitation = groupService.inviteUserToGroup(groupId, userId, currentUser.getId());
-            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "Kullanıcı gruba davet edildi", "invitationId", invitation.getId()));
+            System.out.println("Current user found: " + (currentUser != null ? currentUser.getId() : "null"));
+            
+            groupService.inviteUserToGroup(groupId, userId, currentUser.getId());
+            return ResponseEntity.ok(Map.of("message", "Kullanıcı gruba davet edildi"));
         } catch (Exception e) {
+            System.err.println("ERROR inviting user: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         }
     }

@@ -189,8 +189,8 @@ const Groups = () => {
         return;
       }
       
-      // API servisini kullanarak güvenli istek gönder
-      const response = await api.get('/users/search', {
+      // API servisini kullanarak güvenli istek gönder - URL'i düzelttik
+      const response = await api.get('/user/users/search', {
         params: {
           username: encodeURIComponent(username)
         },
