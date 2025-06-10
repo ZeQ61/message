@@ -1,5 +1,7 @@
 // API endpoint'leri
-export const API_BASE_URL = 'http://localhost:8080';
+export const API_BASE_URL = process.env.NODE_ENV === 'development' 
+  ? 'http://localhost:8080' 
+  : 'https://backend-gq5v.onrender.com';
 
 // WebSocket mesaj türleri
 export const MESSAGE_TYPES = {

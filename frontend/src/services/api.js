@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_URL = 'https://backend-gq5v.onrender.com';
+// API URL'sini ortama göre ayarla
+const API_URL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:8080'
+  : 'https://backend-gq5v.onrender.com';
 
 // Normal kullanıcı API'si
 const api = axios.create({

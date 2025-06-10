@@ -16,6 +16,24 @@ class WebSocketService {
     this.notificationHandlers = {};
   }
 
+  // WebSocket URL'sini düzenleyerek HTTPS desteği ekle
+  getWebSocketUrl() {
+    let wsUrl = `${API_BASE_URL}/ws`;
+    
+    // Eğer backend render.com'da çalışıyorsa doğrudan HTTPS URL'sini kullan
+    if (window.location.hostname !== 'localhost') {
+      wsUrl = 'https://backend-gq5v.onrender.com/ws';
+    }
+    
+    // Tarayıcının protokolüne göre URL'yi ayarla
+    if (window.location.protocol === 'https:' && wsUrl.startsWith('http:')) {
+      wsUrl = wsUrl.replace('http:', 'https:');
+    }
+    
+    console.log('WebSocketService - kullanılan URL:', wsUrl);
+    return wsUrl;
+  }
+
   // WebSocket bağlantısı kurma
   connect() {
     if (this.connectPromise) {
@@ -23,7 +41,8 @@ class WebSocketService {
     }
 
     this.connectPromise = new Promise((resolve, reject) => {
-      const socket = new SockJS(`${API_BASE_URL}/ws?token=${AuthService.getToken()}`);
+      const wsUrl = this.getWebSocketUrl();
+      const socket = new SockJS(`${wsUrl}?token=${AuthService.getToken()}`);
       this.stompClient = Stomp.over(socket);
 
       // Debug modunu kapat

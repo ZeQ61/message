@@ -4,11 +4,19 @@ import SockJS from 'sockjs-client';
 // WebSocket URL'sini dinamik olarak belirle
 const getWebSocketUrl = () => {
   // Öncelikle yapılandırılmış URL'yi kullan
-  const mainWsUrl = 'https://backend-gq5v.onrender.com/ws';
+  let mainWsUrl = 'https://backend-gq5v.onrender.com/ws';
   
   // Geliştirme ortamında localhost'u kullan
   if (process.env.NODE_ENV === 'development' && window.location.hostname === 'localhost') {
     return 'http://localhost:8080/ws';
+  }
+  
+  // Tarayıcının protokolüne göre WebSocket protokolünü ayarla
+  // HTTPS sayfası için WSS, HTTP sayfası için WS kullan
+  if (window.location.protocol === 'https:' && !mainWsUrl.startsWith('wss:')) {
+    // HTTPS sayfasından bağlantı kuruluyorsa ve URL WSS ile başlamıyorsa
+    // URL'yi WSS'ye çevir veya HTTPS olarak bırak (SockJS bunu otomatik olarak WSS'ye çevirecek)
+    mainWsUrl = mainWsUrl.replace('http:', 'https:');
   }
   
   // Mobil cihazlar için CORS sorunlarını önlemek için URL'yi ayarla
@@ -17,6 +25,7 @@ const getWebSocketUrl = () => {
     console.log('Mobil cihaz için WebSocket URL:', mainWsUrl);
   }
   
+  console.log('Kullanılan WebSocket URL:', mainWsUrl);
   return mainWsUrl;
 };
 
