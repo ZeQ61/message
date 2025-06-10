@@ -157,6 +157,7 @@ public class GroupMessageService {
     }
 
     // Yeni mesaj türü desteği için saveGroupMessage metodu ekle
+    @Transactional
     public GroupMessage saveGroupMessage(Long groupId, Long senderId, String content, MessageType type) {
         try {
             // Grup ve gönderen kontrolü

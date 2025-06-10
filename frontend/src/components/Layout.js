@@ -94,17 +94,17 @@ const Layout = ({ children }) => {
         <nav className="sidebar-nav">
           <ul>
             {navItems.map((item) => (
-              <motion.li
+            <motion.li 
                 key={item.path} 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: item.delay, duration: 0.3 }}
                 className={location.pathname === item.path || location.pathname.startsWith(`${item.path}/`) ? 'active' : ''}
-              >
+            >
                 <button onClick={() => navigate(item.path)}>
                   <span style={{ marginRight: '10px' }}>{item.icon}</span> {item.text}
-                </button>
-              </motion.li>
+              </button>
+            </motion.li>
             ))}
           </ul>
         </nav>

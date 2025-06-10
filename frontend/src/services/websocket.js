@@ -136,33 +136,33 @@ export const disconnectWebSocket = () => {
   messageCallbacks = [];
   groupMessageCallbacks = []; // Grup mesaj callback'lerini temizle
   
-  // Abonelikleri iptal et
-  if (statusSubscription) {
+    // Abonelikleri iptal et
+    if (statusSubscription) {
     try {
       statusSubscription.unsubscribe();
     } catch (e) {
       console.warn('Durum aboneliği kapatılırken hata:', e);
     }
-    statusSubscription = null;
-  }
-  
-  if (friendshipSubscription) {
+      statusSubscription = null;
+    }
+    
+    if (friendshipSubscription) {
     try {
       friendshipSubscription.unsubscribe();
     } catch (e) {
       console.warn('Arkadaşlık aboneliği kapatılırken hata:', e);
     }
-    friendshipSubscription = null;
-  }
-  
-  if (messageSubscription) {
+      friendshipSubscription = null;
+    }
+    
+    if (messageSubscription) {
     try {
       messageSubscription.unsubscribe();
     } catch (e) {
       console.warn('Mesaj aboneliği kapatılırken hata:', e);
     }
-    messageSubscription = null;
-  }
+      messageSubscription = null;
+    }
   
   if (groupMessageSubscription) {
     try {
@@ -172,15 +172,15 @@ export const disconnectWebSocket = () => {
     }
     groupMessageSubscription = null;
   }
-  
-  // Bağlantıyı kapat
-  if (stompClient.active) {
-    stompClient.deactivate();
-    console.log('WebSocket bağlantısı kapatıldı');
-  }
-  
-  stompClient = null;
-  connectAttempts = 0; // Sayacı sıfırla
+    
+    // Bağlantıyı kapat
+    if (stompClient.active) {
+      stompClient.deactivate();
+      console.log('WebSocket bağlantısı kapatıldı');
+    }
+    
+    stompClient = null;
+    connectAttempts = 0; // Sayacı sıfırla
 };
 
 // Durum değişikliklerini dinleme
