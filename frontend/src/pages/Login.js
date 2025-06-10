@@ -115,7 +115,7 @@ const Login = () => {
 
           <motion.button
             type="submit"
-            className="auth-button"
+            className="btn-primary"
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
             disabled={loading}

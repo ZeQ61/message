@@ -42,123 +42,49 @@ export const connectWebSocket = () => {
     connectAttempts++;
     console.log(`WebSocket bağlantısı deneme #${connectAttempts}`);
     
-    // Mobil tarayıcı kontrolü
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    console.log(`Cihaz tipi: ${isMobile ? 'Mobil' : 'Desktop'}`);
-    console.log(`Tarayıcı: ${navigator.userAgent}`);
-    
     // Mevcut bağlantıyı temizle
     if (stompClient) {
       try {
         // Eğer aktif bir bağlantı varsa önce kapat
         if (stompClient.active) {
-          console.log('Mevcut WebSocket bağlantısı kapatılıyor...');
           stompClient.deactivate();
         }
         // Referansı temizle
         stompClient = null;
       } catch (e) {
         console.warn('Mevcut bağlantı kapatılırken hata:', e);
-        // Hata olsa bile devam et, yeni bağlantı kurmayı dene
       }
     }
 
     console.log('WebSocket bağlantısı kuruluyor...');
     
     // Kimlik doğrulama token'ını al
-    let token = null;
+    let token = localStorage.getItem('token');
     
-    // Önce localStorage'dan 'token' olarak al
-    try {
-      token = localStorage.getItem('token');
-      if (token) {
-        console.log('WebSocket için token bulundu');
-      }
-    } catch (e) {
-      console.warn('Token alınırken hata:', e);
-    }
-    
-    // Token bulunamadıysa, user objesinden almayı dene
+    // Token yoksa bağlantı kurulamaz
     if (!token) {
-      try {
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (user && user.token) {
-          token = user.token;
-          console.log('WebSocket için token user objesinden alındı');
-        }
-      } catch (e) {
-        console.warn('User objesinden token alınırken hata:', e);
-      }
-    }
-    
-    // Token yoksa bağlantı kurulamaz - bildirim göster ve başarısız ol
-    if (!token) {
-      console.warn('WebSocket bağlantısı için token bulunamadı, kullanıcı henüz giriş yapmamış olabilir');
-      // Token yoksa kullanıcıya bildirim göstermeyi düşünebilirsiniz
+      console.warn('WebSocket bağlantısı için token bulunamadı');
       return resolve({ connected: false, reason: 'no-token' });
     }
     
     try {
       console.log('SockJS bağlantısı hazırlanıyor:', SOCKET_URL);
       
-      // SockJS transport kontrolleri
-      const sockJsTransportOptions = {
-        transports: ['websocket', 'xhr-streaming', 'xhr-polling']
-      };
-      
       // Stomp client oluştur
       stompClient = new Client({
-        // WebSocket fabrikası fonksiyonu düzeltildi
+        // WebSocket fabrikası fonksiyonu
         webSocketFactory: () => {
-          console.log('WebSocket fabrikası oluşturuluyor...');
-          // Yeni SockJS bağlantısı oluştur
-          const sockJsInstance = new SockJS(SOCKET_URL, null, sockJsTransportOptions);
-          // withCredentials ayarını etkinleştir
-          sockJsInstance.withCredentials = true;
-          
-          // Bağlantı event handler'ları
-          sockJsInstance.onopen = () => {
-            console.log('SockJS bağlantısı açıldı');
-            console.log('Transport tipi:', sockJsInstance._transport ? sockJsInstance._transport.transportName : 'bilinmiyor');
-            console.log('Credentials gönderiliyor mu:', sockJsInstance.withCredentials ? 'Evet' : 'Hayır');
-          };
-          
-          sockJsInstance.onclose = (event) => {
-            console.log('SockJS bağlantısı kapandı:', event);
-            console.log('Bağlantı neden kapandı:', event.reason || 'bilinmiyor');
-          };
-          
-          sockJsInstance.onerror = (error) => {
-            console.error('SockJS bağlantı hatası:', error);
-            // Mobil için ek hata bilgisi
-            if (isMobile) {
-              console.error('Mobil cihazda WebSocket bağlantı hatası. Detaylar:', error);
-            }
-          };
-          
-          return sockJsInstance;
+          return new SockJS(SOCKET_URL);
         },
         debug: (str) => {
-          // Debug modda logları göster, üretimde kapatılabilir
           console.debug('STOMP:', str);
         },
-        // Bağlantı kesintilerinde tekrar bağlanma stratejisi
-        reconnectDelay: 5000, // 5 saniyede bir tekrar bağlanmayı dene
-        maxRetries: 10, // Maksimum yeniden bağlanma denemesi
+        reconnectDelay: 5000,
         heartbeatIncoming: 4000,
         heartbeatOutgoing: 4000,
         // Bağlantı başlıklarına token ekle
         connectHeaders: {
           'Authorization': `Bearer ${token}`
-        },
-        // CORS ayarı için withCredentials true olarak ayarlandı
-        withCredentials: true,
-        // Otomatik yeniden bağlanma stratejisi ekle
-        beforeConnect: () => {
-          console.log('WebSocket bağlantısı kuruluyor...');
-        },
-        onStompError: (frame) => {
-          console.error('STOMP hatası:', frame);
         }
       });
 
@@ -189,30 +115,10 @@ export const connectWebSocket = () => {
       stompClient.onStompError = (frame) => {
         const errorMsg = `WebSocket bağlantı hatası: ${frame.headers['message']}`;
         console.error(errorMsg);
-        console.error('Ek detaylar:', frame.body);
-        
-        // Mobil için ek hata bilgisi
-        if (isMobile) {
-          console.error('Mobil cihazda STOMP hatası:', frame);
-        }
-        
-        // STOMP hatası - başarısız
         reject(new Error(errorMsg));
       };
       
-      // Bağlantı başarısız olduğunda
-      stompClient.onWebSocketError = (event) => {
-        console.error('WebSocket hatası:', event);
-        reject(new Error('WebSocket bağlantı hatası'));
-      };
-      
-      // Bağlantı kesildiğinde
-      stompClient.onWebSocketClose = (event) => {
-        console.log('WebSocket bağlantısı kesildi:', event);
-      };
-      
       // Bağlantıyı aktifleştir
-      console.log('WebSocket bağlantısı aktifleştiriliyor...');
       stompClient.activate();
       
     } catch (error) {

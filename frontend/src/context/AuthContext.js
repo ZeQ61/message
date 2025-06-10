@@ -343,17 +343,11 @@ export const AuthProvider = ({ children }) => {
       const profileResponse = await userService.getProfile();
       setUser(profileResponse.data);
       
-      // Çevrimiçi durumunu güncelle
-      await userService.updateOnlineStatus(true);
-      
-      // WebSocket bağlantısı kur
-      connectWebSocket();
-      
       setLoading(false);
       return true;
     } catch (err) {
       setLoading(false);
-      setError('Giriş başarısız oldu. Lütfen bilgilerinizi kontrol edin.');
+      setError('Giriş başarısız oldu.');
       return false;
     }
   };
