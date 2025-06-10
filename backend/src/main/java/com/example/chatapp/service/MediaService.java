@@ -248,23 +248,36 @@ public class MediaService {
         
         // Sonuç döndür
         Map<String, String> mediaInfo = new HashMap<>();
-        mediaInfo.put("url", (String) uploadResult.get("secure_url"));
-        mediaInfo.put("publicId", (String) uploadResult.get("public_id"));
-        mediaInfo.put("type", contentType);
-        
-        if (uploadResult.get("width") != null) {
-            mediaInfo.put("width", uploadResult.get("width").toString());
-        }
-        
-        if (uploadResult.get("height") != null) {
-            mediaInfo.put("height", uploadResult.get("height").toString());
-        }
-        
-        if (uploadResult.get("format") != null) {
-            mediaInfo.put("format", (String) uploadResult.get("format"));
-        }
-        
+        mediaInfo.put("url", (String) uploadResult.get("url"));
+        mediaInfo.put("type", contentType.startsWith("image/") ? "image" : 
+                           contentType.startsWith("video/") ? "video" : "document");
         return mediaInfo;
+    }
+    
+    /**
+     * Dosyayı Cloudinary'ye yükler ve URL'ini döner (GroupService için)
+     */
+    public String uploadFile(MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("Dosya boş olamaz");
+        }
+        
+        // Dosya tipini ve içeriğini kontrol et
+        if (!isAllowedFileType(file.getOriginalFilename()) || !isSafeContent(file)) {
+            throw new IllegalArgumentException("Desteklenmeyen dosya tipi veya zararlı içerik");
+        }
+        
+        // Cloudinary'ye yükle
+        Map<String, Object> uploadParams = new HashMap<>();
+        String contentType = file.getContentType();
+        uploadParams.put("resource_type", getResourceType(contentType));
+        uploadParams.put("folder", "group_images");
+        uploadParams.put("public_id", generateUniqueId());
+        
+        Map uploadResult = cloudinaryService.upload(file.getBytes(), uploadParams);
+        
+        // URL'i döndür
+        return (String) uploadResult.get("url");
     }
     
     /**
