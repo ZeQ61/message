@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaComments, FaUserFriends, FaUser, FaSignOutAlt, FaBars, FaTimes } from 'react-icons/fa';
+import { FaComments, FaUserFriends, FaUser, FaSignOutAlt, FaBars, FaTimes, FaUsers } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import ThemeToggle from './ThemeToggle';
 import '../styles/home.scss';
@@ -89,9 +89,9 @@ const Layout = ({ children }) => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2, duration: 0.3 }}
-              className={location.pathname === '/message' ? 'active' : ''}
+              className={location.pathname === '/messages' ? 'active' : ''}
             >
-              <button onClick={() => navigate('/message')}>
+              <button onClick={() => navigate('/messages')}>
                 <FaComments style={{ marginRight: '10px' }} /> Mesajlar
               </button>
             </motion.li>
@@ -99,6 +99,16 @@ const Layout = ({ children }) => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3, duration: 0.3 }}
+              className={location.pathname === '/groups' ? 'active' : ''}
+            >
+              <button onClick={() => navigate('/groups')}>
+                <FaUsers style={{ marginRight: '10px' }} /> Gruplar
+              </button>
+            </motion.li>
+            <motion.li 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4, duration: 0.3 }}
               className={location.pathname === '/friends' ? 'active' : ''}
             >
               <button onClick={() => navigate('/friends')}>
@@ -108,7 +118,7 @@ const Layout = ({ children }) => {
             <motion.li 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4, duration: 0.3 }}
+              transition={{ delay: 0.5, duration: 0.3 }}
               className={location.pathname === '/profile' ? 'active' : ''}
             >
               <button onClick={() => navigate('/profile')}>

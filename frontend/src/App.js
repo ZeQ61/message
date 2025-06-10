@@ -11,6 +11,8 @@ import Profile from './pages/Profile';
 import AdminLogin from './pages/AdminLogin';
 import AdminRegister from './pages/AdminRegister';
 import AdminPanel from './pages/AdminPanel';
+import Groups from './pages/Groups';
+import GroupChat from './pages/GroupChat';
 import { connectWebSocket, ensureConnected } from './services/websocket';
 import './App.scss';
 
@@ -71,6 +73,8 @@ function App() {
           <Route path="/messages" element={<Message />} />
           <Route path="/friends" element={<Friends />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/groups" element={<Groups />} />
+          <Route path="/group-chat/:groupId" element={<GroupChat />} />
           <Route path="/" element={<Navigate to="/messages" />} />
           
           {/* Admin Routes */}
