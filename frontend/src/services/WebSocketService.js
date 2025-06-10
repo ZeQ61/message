@@ -26,8 +26,8 @@ class WebSocketService {
     }
     
     // Tarayıcının protokolüne göre URL'yi ayarla
-    if (window.location.protocol === 'https:' && wsUrl.startsWith('http:')) {
-      wsUrl = wsUrl.replace('http:', 'https:');
+    if (window.location.protocol === 'https:') {
+      wsUrl = 'https://backend-gq5v.onrender.com/ws';
     }
     
     console.log('WebSocketService - kullanılan URL:', wsUrl);

@@ -13,10 +13,9 @@ const getWebSocketUrl = () => {
   
   // Tarayıcının protokolüne göre WebSocket protokolünü ayarla
   // HTTPS sayfası için WSS, HTTP sayfası için WS kullan
-  if (window.location.protocol === 'https:' && !mainWsUrl.startsWith('wss:')) {
-    // HTTPS sayfasından bağlantı kuruluyorsa ve URL WSS ile başlamıyorsa
-    // URL'yi WSS'ye çevir veya HTTPS olarak bırak (SockJS bunu otomatik olarak WSS'ye çevirecek)
-    mainWsUrl = mainWsUrl.replace('http:', 'https:');
+  if (window.location.protocol === 'https:') {
+    // HTTPS sayfasından bağlantı kuruluyorsa
+    mainWsUrl = 'https://backend-gq5v.onrender.com/ws';
   }
   
   // Mobil cihazlar için CORS sorunlarını önlemek için URL'yi ayarla
