@@ -697,69 +697,96 @@ const sendJoinMessage = (chatId) => {
 
 // WebSocket bağlantısının durumunu kontrol et
 export const isConnected = () => {
-  return stompClient && stompClient.active && stompClient.connected;
+  try {
+    return stompClient !== null && stompClient.active === true;
+  } catch (error) {
+    console.error('WebSocket bağlantı durumu kontrol edilirken hata:', error);
+    return false;
+  }
 };
 
 // WebSocket bağlantısını güvenli şekilde tekrar kurmayı dene
 export const ensureConnected = async () => {
-  // Eğer bağlantı zaten kuruluysa, devam et
-  if (isConnected()) {
-    console.log('WebSocket bağlantısı zaten kurulu');
-    return true;
-  }
-  
-  console.log('WebSocket bağlantısı kuruluyor...');
-  
-  // Birden fazla aynı anda bağlantı denemesini önlemek için
-  // Statik bir değişken kullanarak bağlantı durumunu takip edebiliriz
-  if (window._webSocketConnecting) {
-    console.log('WebSocket bağlantısı zaten kurulmaya çalışılıyor, bekleyiniz...');
-    
-    // En fazla 5 saniye bekle
-    return new Promise((resolve) => {
-      let checkCount = 0;
-      const maxChecks = 10; // 5 saniye (500ms * 10)
-      
-      const checkInterval = setInterval(() => {
-        checkCount++;
-        
-        if (isConnected()) {
-          clearInterval(checkInterval);
-          resolve(true);
-        }
-        
-        if (checkCount >= maxChecks) {
-          clearInterval(checkInterval);
-          // Bağlantı kurulamadı, yeni bir bağlantı denemesi başlat
-          window._webSocketConnecting = false;
-          resolve(false);
-        }
-      }, 500);
-    });
-  }
-  
-  // Bağlantı kurulmaya başlandığını işaretle
-  window._webSocketConnecting = true;
-  
   try {
-    // Bağlantıyı kur
-    const result = await connectWebSocket();
-    window._webSocketConnecting = false;
+    // Eğer bağlantı zaten kuruluysa, devam et
+    if (isConnected()) {
+      console.log('WebSocket bağlantısı zaten kurulu');
+      return { connected: true };
+    }
     
-    if (result && result.connected) {
-      console.log('WebSocket bağlantısı başarıyla kuruldu');
-      return true;
-    } else {
-      console.warn('WebSocket bağlantısı kurulamadı:', result ? result.reason : 'bilinmeyen sebep');
-      // Kullanıcıya bildirim gösterilebilir
-      return false;
+    console.log('WebSocket bağlantısı kuruluyor...');
+    
+    // Birden fazla aynı anda bağlantı denemesini önlemek için
+    if (window._webSocketConnecting) {
+      console.log('WebSocket bağlantısı zaten kurulmaya çalışılıyor, bekleyiniz...');
+      
+      // En fazla 5 saniye bekle
+      return new Promise((resolve) => {
+        let checkCount = 0;
+        const maxChecks = 10; // 5 saniye (500ms * 10)
+        
+        const checkInterval = setInterval(() => {
+          checkCount++;
+          
+          if (isConnected()) {
+            clearInterval(checkInterval);
+            resolve({ connected: true });
+          }
+          
+          if (checkCount >= maxChecks) {
+            clearInterval(checkInterval);
+            // Bağlantı kurulamadı, yeni bir bağlantı denemesi başlat
+            window._webSocketConnecting = false;
+            resolve({ connected: false, reason: 'timeout' });
+          }
+        }, 500);
+      });
+    }
+    
+    // Bağlantı kurulmaya başlandığını işaretle
+    window._webSocketConnecting = true;
+    
+    try {
+      // Bağlantıyı kur
+      const result = await connectWebSocket();
+      window._webSocketConnecting = false;
+      
+      return result; // { connected: true/false, reason: string }
+    } catch (error) {
+      window._webSocketConnecting = false;
+      console.error('WebSocket bağlantısı kurulurken hata:', error);
+      return { connected: false, reason: error.message || 'unknown-error' };
     }
   } catch (error) {
-    window._webSocketConnecting = false;
-    console.error('WebSocket bağlantısı kurulurken hata:', error);
-    // Kullanıcıya hata bildirimi gösterilebilir
-    return false;
+    console.error('ensureConnected fonksiyonunda beklenmeyen hata:', error);
+    return { connected: false, reason: 'unexpected-error' };
   }
+};
+
+// WebSocket bağlantı durumunu global olarak kontrol edebilmek için yardımcı fonksiyon
+export const isWebSocketConnected = () => {
+  // Bu fonksiyon diğer dosyalardan doğrudan kontrol edilebilir
+  return stompClient !== null && stompClient.active === true;
+};
+
+// WebSocket bağlantısını kurmak için Promise döndüren bir fonksiyon
+export const getWebSocketConnection = () => {
+  return new Promise(async (resolve) => {
+    try {
+      if (isWebSocketConnected()) {
+        // Zaten bağlantı varsa hemen döndür
+        resolve({ connected: true, client: stompClient });
+        return;
+      }
+      
+      // Yeni bağlantı kur
+      const connection = await connectWebSocket();
+      resolve(connection);
+    } catch (error) {
+      console.error('WebSocket bağlantısı alınırken hata:', error);
+      resolve({ connected: false, reason: error.message || 'unknown-error' });
+    }
+  });
 };
 
 export default {
@@ -775,5 +802,7 @@ export default {
   sendChatMessage,
   joinChat,
   isConnected,
-  ensureConnected
+  ensureConnected,
+  isWebSocketConnected,
+  getWebSocketConnection
 }; 

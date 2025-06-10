@@ -346,11 +346,18 @@ const Message = () => {
   
   // Mesaj gönder
   const handleSendMessage = async () => {
-    if (!messageText.trim() || !selectedChat || !user) return;
+    // Gerekli kontroller
+    if (!messageText || messageText.trim() === '') {
+      // Boş mesaj göndermeye izin verme
+      return;
+    }
+    
+    if (!selectedChat || !selectedChat.id) {
+      showToast('Lütfen önce bir sohbet seçin', 'warning');
+      return;
+    }
     
     try {
-      // Gönderim durumunu başlatma, kaldırdık
-      
       // WebSocket bağlantısını kontrol et ve gerekirse yeniden bağlan
       let wsConnection;
       try {
@@ -369,7 +376,7 @@ const Message = () => {
           for (let i = 0; i < 3; i++) {
             await new Promise(resolve => setTimeout(resolve, 1000));
             console.log(`WebSocket bağlantısı için ${i+1}. yeniden deneme...`);
-            wsConnection = await websocketService.ensureConnected();
+            wsConnection = await websocketService.connectWebSocket();
             if (wsConnection.connected) {
               console.log('WebSocket bağlantısı yeniden deneme sonrası kuruldu');
               showToast('Bağlantı sağlandı, mesajınız gönderiliyor...', 'success');
@@ -681,22 +688,27 @@ const Message = () => {
     }
   }, [user, navigate]);
 
-  // WebSocket bağlantısı kontrolü için periyodik kontrol
+  // WebSocket bağlantısını periyodik olarak kontrol et
   useEffect(() => {
-    if (!user) return;
+    // Kullanıcı yoksa bu kontrolleri yapma
+    if (!user) return () => {};
     
-    // WebSocket bağlantısını periyodik olarak kontrol et
+    // Her 30 saniyede bir WebSocket bağlantısını kontrol et
     const connectionCheckInterval = setInterval(async () => {
       try {
-        // Bağlantı durumunu kontrol et
-        if (!websocketService.isConnected()) {
+        // Websocket bağlantısını kontrol et
+        const isConnected = websocketService.isConnected();
+        
+        if (!isConnected) {
           console.log('Periyodik kontrol: WebSocket bağlantısı kopmuş, yeniden bağlanılıyor...');
-          const reconnection = await websocketService.ensureConnected();
+          const reconnection = await websocketService.connectWebSocket();
           
           if (reconnection.connected) {
             console.log('WebSocket bağlantısı yeniden kuruldu');
-            // Mesaj dinleyicisini yeniden ekle (eğer eklenmemişse)
-            addMessageListener(handleNewMessage);
+            
+            // Mesaj dinleyicisini ekle (varsa)
+            removeMessageListener(handleNewMessage); // Önce mevcut dinleyiciyi kaldır
+            addMessageListener(handleNewMessage);  // Sonra yeniden ekle
             
             // Eğer seçili sohbet varsa, sohbete katıl
             if (selectedChat && selectedChat.id) {
