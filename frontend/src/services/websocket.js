@@ -124,9 +124,13 @@ export const connectWebSocket = () => {
       // SockJS bağlantısı kur
       const socket = new SockJS(SOCKET_URL, null, sockJsTransportOptions);
       
+      // WebSocket'in withCredentials özelliğini true olarak ayarla
+      socket.withCredentials = true;
+      
       socket.onopen = () => {
         console.log('SockJS bağlantısı açıldı');
         console.log('Transport tipi:', socket._transport ? socket._transport.transportName : 'bilinmiyor');
+        console.log('Credentials gönderiliyor mu:', socket.withCredentials ? 'Evet' : 'Hayır');
       };
       
       socket.onclose = (event) => {
@@ -158,6 +162,8 @@ export const connectWebSocket = () => {
         connectHeaders: {
           'Authorization': `Bearer ${token}`
         },
+        // CORS ayarı için withCredentials true olarak ayarlandı
+        withCredentials: true,
         // Otomatik yeniden bağlanma stratejisi ekle
         beforeConnect: () => {
           console.log('WebSocket bağlantısı kuruluyor...');

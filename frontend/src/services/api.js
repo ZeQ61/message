@@ -8,7 +8,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: false,
+  withCredentials: true,
   timeout: 10000, // 10 saniye
 });
 
@@ -18,7 +18,7 @@ const adminApi = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: false,
+  withCredentials: true,
   timeout: 10000, // 10 saniye
 });
 

@@ -60,13 +60,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(@NonNull StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("https://frontend-gamma-six-67.vercel.app", "http://localhost:3000")
+                // .setAllowedOrigins("https://frontend-gamma-six-67.vercel.app", "http://localhost:3000")
+                .setAllowedOriginPatterns("*")
                 .withSockJS()
                 .setWebSocketEnabled(true)
                 .setHeartbeatTime(25000)
                 .setDisconnectDelay(5000);
 
-        logger.info("WebSocket endpoint kaydedildi: /ws (SockJS ile) - Belirli originlere izin veriliyor");
+        logger.info("WebSocket endpoint kaydedildi: /ws (SockJS ile) - CORS ayarları güncellendi");
     }
 
 
