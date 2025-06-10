@@ -17,6 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +26,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/user")
@@ -166,5 +170,25 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", "Token yenilenirken hata oluştu: " + e.getMessage()));
         }
+    }
+
+    // Kullanıcıları kullanıcı adına göre ara
+    @GetMapping("/search")
+    public ResponseEntity<?> searchUsers(@RequestParam String username, @AuthenticationPrincipal UserDetails userDetails) {
+        String currentUsername = userDetails.getUsername();
+        User currentUser = userService.findByUsername(currentUsername);
+        
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Kullanıcı bulunamadı"));
+        }
+        
+        List<User> users = userService.searchByUsername(username);
+        
+        // Kendini sonuçlardan çıkar
+        users = users.stream()
+            .filter(user -> !user.getUsername().equals(currentUsername))
+            .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(users);
     }
 }

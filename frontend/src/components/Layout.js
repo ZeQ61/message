@@ -44,6 +44,14 @@ const Layout = ({ children }) => {
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
+  
+  // Navigation için sayfa listesi
+  const navItems = [
+    { path: '/messages', icon: <FaComments />, text: 'Mesajlar', delay: 0.2 },
+    { path: '/groups', icon: <FaUsers />, text: 'Gruplar', delay: 0.3 },
+    { path: '/friends', icon: <FaUserFriends />, text: 'Arkadaşlar', delay: 0.4 },
+    { path: '/profile', icon: <FaUser />, text: 'Profil', delay: 0.5 },
+  ];
 
   return (
     <div className="home-container">
@@ -85,46 +93,19 @@ const Layout = ({ children }) => {
 
         <nav className="sidebar-nav">
           <ul>
-            <motion.li 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2, duration: 0.3 }}
-              className={location.pathname === '/messages' ? 'active' : ''}
-            >
-              <button onClick={() => navigate('/messages')}>
-                <FaComments style={{ marginRight: '10px' }} /> Mesajlar
-              </button>
-            </motion.li>
-            <motion.li 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3, duration: 0.3 }}
-              className={location.pathname === '/groups' ? 'active' : ''}
-            >
-              <button onClick={() => navigate('/groups')}>
-                <FaUsers style={{ marginRight: '10px' }} /> Gruplar
-              </button>
-            </motion.li>
-            <motion.li 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4, duration: 0.3 }}
-              className={location.pathname === '/friends' ? 'active' : ''}
-            >
-              <button onClick={() => navigate('/friends')}>
-                <FaUserFriends style={{ marginRight: '10px' }} /> Arkadaşlar
-              </button>
-            </motion.li>
-            <motion.li 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5, duration: 0.3 }}
-              className={location.pathname === '/profile' ? 'active' : ''}
-            >
-              <button onClick={() => navigate('/profile')}>
-                <FaUser style={{ marginRight: '10px' }} /> Profil
-              </button>
-            </motion.li>
+            {navItems.map((item) => (
+              <motion.li
+                key={item.path} 
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: item.delay, duration: 0.3 }}
+                className={location.pathname === item.path || location.pathname.startsWith(`${item.path}/`) ? 'active' : ''}
+              >
+                <button onClick={() => navigate(item.path)}>
+                  <span style={{ marginRight: '10px' }}>{item.icon}</span> {item.text}
+                </button>
+              </motion.li>
+            ))}
           </ul>
         </nav>
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaUsers, FaPlus, FaEdit, FaTrash, FaUserPlus, FaArrowLeft } from 'react-icons/fa';
+import { FaUsers, FaPlus, FaEdit, FaTrash, FaUserPlus, FaArrowLeft, FaTimes } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import Layout from '../components/Layout';
 import Toast from '../components/Toast';
@@ -23,7 +23,10 @@ const Groups = () => {
     groupImage: null,
     memberIds: []
   });
-  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteUsername, setInviteUsername] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [toast, setToast] = useState(null);
@@ -168,26 +171,79 @@ const Groups = () => {
     }
   };
   
+  // Kullanıcı ara
+  const searchUsers = async (username) => {
+    if (!username.trim() || username.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsSearching(true);
+    
+    try {
+      const response = await fetch(`https://backend-gq5v.onrender.com/api/users/search?username=${encodeURIComponent(username)}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Kullanıcı arama hatası');
+      }
+      
+      const data = await response.json();
+      setSearchResults(data);
+    } catch (error) {
+      console.error('Kullanıcı arama hatası:', error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Kullanıcı adı değiştiğinde ara
+  const handleUsernameChange = (e) => {
+    const value = e.target.value;
+    setInviteUsername(value);
+    setSelectedUser(null);
+    
+    // Debounce ile arama yap
+    if (value.trim().length >= 2) {
+      const handler = setTimeout(() => {
+        searchUsers(value);
+      }, 300);
+      
+      return () => clearTimeout(handler);
+    } else {
+      setSearchResults([]);
+    }
+  };
+  
+  // Kullanıcı seçildiğinde
+  const selectUserForInvite = (user) => {
+    setSelectedUser(user);
+    setInviteUsername(user.username);
+    setSearchResults([]);
+  };
+
   // Kullanıcıyı gruba davet et
   const handleInviteUser = async (e) => {
     e.preventDefault();
     
-    if (!selectedGroup || !inviteEmail.trim()) {
-      showToast('Geçerli bir e-posta adresi gereklidir', 'error');
+    if (!selectedGroup || !selectedUser) {
+      showToast('Geçerli bir kullanıcı seçmelisiniz', 'error');
       return;
     }
     
     try {
       setIsLoading(true);
       
-      // Gerçek uygulamada, e-posta adresinden kullanıcı ID'sini almak için 
-      // bir API çağrısı yapılması gerekebilir
-      const userId = 1; // Örnek kullanıcı ID
+      await groupService.inviteUserToGroup(selectedGroup.id, selectedUser.id);
       
-      await groupService.inviteUserToGroup(selectedGroup.id, userId);
-      
-      showToast('Kullanıcı gruba başarıyla davet edildi', 'success');
-      setInviteEmail('');
+      showToast(`${selectedUser.username} gruba başarıyla davet edildi`, 'success');
+      setInviteUsername('');
+      setSelectedUser(null);
       setShowInviteForm(false);
     } catch (error) {
       console.error('Kullanıcı davet edilirken hata:', error);
@@ -255,7 +311,9 @@ const Groups = () => {
   // Davet formunu aç
   const openInviteForm = (group) => {
     setSelectedGroup(group);
-    setInviteEmail('');
+    setInviteUsername('');
+    setSelectedUser(null);
+    setSearchResults([]);
     setShowInviteForm(true);
   };
   
@@ -559,15 +617,83 @@ const Groups = () => {
               </div>
               <form onSubmit={handleInviteUser}>
                 <div className="form-group">
-                  <label htmlFor="inviteEmail">E-posta Adresi *</label>
+                  <label htmlFor="inviteUsername">Kullanıcı Adı *</label>
                   <input
-                    type="email"
-                    id="inviteEmail"
-                    value={inviteEmail}
-                    onChange={(e) => setInviteEmail(e.target.value)}
+                    type="text"
+                    id="inviteUsername"
+                    value={inviteUsername}
+                    onChange={handleUsernameChange}
+                    placeholder="Kullanıcı adını yazın..."
+                    autoComplete="off"
                     required
                   />
+                  
+                  {isSearching && (
+                    <div className="search-loading">Aranıyor...</div>
+                  )}
+                  
+                  {searchResults.length > 0 && !selectedUser && (
+                    <div className="search-results">
+                      {searchResults.map(user => (
+                        <div 
+                          key={user.id} 
+                          className="search-result-item"
+                          onClick={() => selectUserForInvite(user)}
+                        >
+                          <div className="user-avatar">
+                            {user.profileImageUrl ? (
+                              <img src={user.profileImageUrl} alt={user.username} />
+                            ) : (
+                              <div className="default-avatar">
+                                {user.username.charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                          </div>
+                          <div className="user-info">
+                            <span className="username">{user.username}</span>
+                            {user.email && <span className="email">{user.email}</span>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {searchResults.length === 0 && inviteUsername.length >= 2 && !isSearching && !selectedUser && (
+                    <div className="no-results">Kullanıcı bulunamadı</div>
+                  )}
                 </div>
+                
+                {selectedUser && (
+                  <div className="selected-user">
+                    <p>Davet edilecek kullanıcı:</p>
+                    <div className="user-details">
+                      <div className="user-avatar">
+                        {selectedUser.profileImageUrl ? (
+                          <img src={selectedUser.profileImageUrl} alt={selectedUser.username} />
+                        ) : (
+                          <div className="default-avatar">
+                            {selectedUser.username.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <div className="user-info">
+                        <span className="username">{selectedUser.username}</span>
+                        {selectedUser.email && <span className="email">{selectedUser.email}</span>}
+                      </div>
+                      <button 
+                        type="button"
+                        className="remove-user-btn"
+                        onClick={() => {
+                          setSelectedUser(null);
+                          setInviteUsername('');
+                        }}
+                      >
+                        <FaTimes />
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
                 <div className="form-actions">
                   <button 
                     type="button" 
@@ -579,7 +705,7 @@ const Groups = () => {
                   <button 
                     type="submit" 
                     className="submit-btn"
-                    disabled={isLoading}
+                    disabled={isLoading || !selectedUser}
                   >
                     {isLoading ? 'Davet Ediliyor...' : 'Davet Et'}
                   </button>

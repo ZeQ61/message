@@ -189,10 +189,18 @@ const groupService = {
   // Kullanıcıyı gruba davet et
   inviteUserToGroup: async (groupId, userId) => {
     try {
-      const response = await api.post(`/api/groups/${groupId}/invite/${userId}`);
+      const response = await axios.post(
+        `${API_URL}/groups/${groupId}/invite/${userId}`,
+        {},
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
       return response.data;
     } catch (error) {
-      console.error('Kullanıcı gruba davet edilirken hata:', error);
+      console.error('Kullanıcı davet edilirken hata:', error);
       throw error;
     }
   },
