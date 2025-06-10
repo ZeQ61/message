@@ -13,7 +13,7 @@ import AdminRegister from './pages/AdminRegister';
 import AdminPanel from './pages/AdminPanel';
 import Groups from './pages/Groups';
 import GroupChat from './pages/GroupChat';
-import { ensureConnected } from './services/websocket';
+import { connectWebSocket, ensureConnected } from './services/websocket';
 import './App.scss';
 
 function App() {

@@ -1,9 +1,7 @@
 import axios from 'axios';
 import api from './api';
-import MediaService from './MediaService';
 
 const API_URL = 'https://backend-gq5v.onrender.com';
-const mediaService = new MediaService();
 
 // Grup API servisi - Bu tanımlama kaldırıldı çünkü zaten api import edildi
 // Servisleri api ile çağıracağız
@@ -32,15 +30,7 @@ const groupService = {
       }
       
       if (groupImage) {
-        // Önce medya yükle
-        try {
-          const mediaResponse = await mediaService.uploadMedia('groups', groupImage);
-          if (mediaResponse.data && mediaResponse.data.url) {
-            formData.append('imageUrl', mediaResponse.data.url);
-          }
-        } catch (mediaError) {
-          console.error('Grup resmi yüklenirken hata:', mediaError);
-        }
+        formData.append('groupImage', groupImage);
       }
       
       if (memberIds && memberIds.length > 0) {
@@ -151,15 +141,7 @@ const groupService = {
       }
       
       if (groupImage) {
-        // Önce medya yükle
-        try {
-          const mediaResponse = await mediaService.uploadMedia('groups', groupImage);
-          if (mediaResponse.data && mediaResponse.data.url) {
-            formData.append('imageUrl', mediaResponse.data.url);
-          }
-        } catch (mediaError) {
-          console.error('Grup resmi güncellenirken hata:', mediaError);
-        }
+        formData.append('groupImage', groupImage);
       }
       
       const response = await api.put(`/api/groups/${groupId}`, formData, {
@@ -322,16 +304,8 @@ const groupService = {
   // Medya mesajı gönder
   sendGroupMediaMessage: async (groupId, mediaFile) => {
     try {
-      // Önce medya yükle
-      const mediaResponse = await mediaService.uploadMedia('groups', mediaFile);
-      
-      if (!mediaResponse.data || !mediaResponse.data.url) {
-        throw new Error('Medya yükleme başarısız');
-      }
-      
       const formData = new FormData();
-      formData.append('mediaUrl', mediaResponse.data.url);
-      formData.append('mediaType', mediaService.getMediaType(mediaFile));
+      formData.append('media', mediaFile);
       
       const response = await api.post(`/api/groups/${groupId}/messages/media`, formData, {
         headers: {
