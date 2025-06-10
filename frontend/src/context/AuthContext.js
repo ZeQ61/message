@@ -8,10 +8,6 @@ import {
   addFriendshipUpdateListener,
   removeFriendshipUpdateListener
 } from '../services/websocket';
-import axios from 'axios';
-
-// API URL
-const API_URL = 'https://backend-gq5v.onrender.com';
 
 // Kimlik doğrulama context'ini oluştur
 const AuthContext = createContext();
@@ -343,14 +339,14 @@ export const AuthProvider = ({ children }) => {
       
       console.log('Login isteği gönderiliyor:', username);
       
-      // Direkt API çağrısı yaparak, userService kullanmak yerine
-      const response = await axios.post(`${API_URL}/user/login`, 
-        { username, password },
-        { 
-          headers: { 'Content-Type': 'application/json' },
-          timeout: 30000 // 30 saniye
-        }
-      );
+      // userService kullanarak istek yapma
+      const response = await userService.login(username, password);
+      
+      // Yanıt kontrolü
+      if (!response || !response.data) {
+        console.error('Geçersiz yanıt:', response);
+        throw new Error('Sunucudan geçersiz yanıt alındı');
+      }
       
       console.log('Login yanıtı alındı:', response.status);
       
@@ -364,7 +360,21 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', token);
       
       // Kullanıcı bilgilerini al
-      await fetchUserProfile(token);
+      try {
+        // Profil bilgilerini getir
+        const profileResponse = await userService.getProfile();
+        if (!profileResponse || !profileResponse.data) {
+          throw new Error('Profil bilgileri alınamadı');
+        }
+        
+        setUser(profileResponse.data);
+        
+        // Çevrimiçi durumunu güncelle
+        await userService.updateOnlineStatus(true);
+      } catch (profileError) {
+        console.error('Profil bilgileri alınamadı:', profileError);
+        // Profil hatası login işlemini engellemesin
+      }
       
       // WebSocket bağlantısı kur
       try {
@@ -805,62 +815,6 @@ export const AuthProvider = ({ children }) => {
       return false;
     } finally {
       setFriendLoading(false);
-    }
-  };
-
-  // Kullanıcı profilini getir
-  const fetchUserProfile = async (token) => {
-    try {
-      console.log('Profil bilgileri getiriliyor...');
-      
-      // Token ile profil bilgilerini al
-      const profileResponse = await axios.get(`${API_URL}/user/profile`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        timeout: 30000 // 30 saniye
-      });
-      
-      console.log('Profil bilgileri alındı');
-      
-      // Kullanıcı bilgilerini state'e kaydet
-      setUser(profileResponse.data);
-      
-      // Giriş yapıldığında otomatik olarak çevrimiçi yap
-      try {
-        console.log('Kullanıcı durumu güncelleniyor: çevrimiçi');
-        await axios.put(`${API_URL}/user/status`, 
-          { isOnline: true },
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            },
-            timeout: 30000 // 30 saniye
-          }
-        );
-        
-        // Durumu güncelledikten sonra tekrar profil bilgilerini çek
-        const updatedProfileResponse = await axios.get(`${API_URL}/user/profile`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          timeout: 30000 // 30 saniye
-        });
-        
-        setUser(updatedProfileResponse.data);
-        console.log('Kullanıcı durumu güncellendi');
-      } catch (e) {
-        console.error("Otomatik çevrimiçi yapma sırasında hata:", e);
-        // Durum güncellenemese bile devam et
-      }
-      
-      return profileResponse.data;
-    } catch (error) {
-      console.error('Profil bilgileri alınamadı:', error);
-      throw error;
     }
   };
 
