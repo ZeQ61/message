@@ -12,7 +12,7 @@ RUN mvn clean package -DskipTests
 FROM openjdk:17-jdk-slim
 
 # .jar dosyasını kopyala
-COPY --from=build /app/target/chatapp-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /app/target/message-0.0.1-SNAPSHOT.jar app.jar
 
 # Uygulamayı başlat
 ENTRYPOINT ["java", "-jar", "/app.jar"]
