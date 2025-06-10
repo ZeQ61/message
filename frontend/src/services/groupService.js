@@ -1,4 +1,5 @@
 import axios from 'axios';
+import api from './api';
 
 const API_URL = 'https://backend-gq5v.onrender.com';
 
@@ -189,15 +190,8 @@ const groupService = {
   // Kullanıcıyı gruba davet et
   inviteUserToGroup: async (groupId, userId) => {
     try {
-      const response = await axios.post(
-        `${API_URL}/groups/${groupId}/invite/${userId}`,
-        {},
-        {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        }
-      );
+      // API servisini kullanarak CORS sorunlarını çöz
+      const response = await api.post(`/groups/${groupId}/invite/${userId}`);
       return response.data;
     } catch (error) {
       console.error('Kullanıcı davet edilirken hata:', error);

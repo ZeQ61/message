@@ -45,11 +45,14 @@ public class SecurityConfig {
             .requestMatchers("/admin/login", "/admin/register").permitAll()
             // WebSocket endpoint'leri için izin
             .requestMatchers("/ws/**").permitAll()
+            .requestMatchers("/ws/info").permitAll()
             // Dosyalara erişim için daha kapsamlı izinler
             .requestMatchers("/user/images/**").permitAll()
             .requestMatchers("/uploads/**").permitAll()
             // Diğer dosya erişim yolları için izinler
             .requestMatchers("/resources/**", "/static/**", "/images/**").permitAll()
+            // Profil resmi düzeltme endpoint'i
+            .requestMatchers("/api/users/fix-profile-images").permitAll()
             // Other endpoints requires authentication
             .anyRequest().authenticated()
             .and()

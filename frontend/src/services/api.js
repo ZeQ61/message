@@ -8,6 +8,8 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: false,
+  timeout: 10000, // 10 saniye
 });
 
 // Admin API'si (ayrı bir instance)
@@ -16,6 +18,8 @@ const adminApi = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: false,
+  timeout: 10000, // 10 saniye
 });
 
 // Normal kullanıcı istekleri için interceptor
@@ -28,6 +32,17 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Yanıt interceptor'u ekle
+api.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    console.error('API Hatası:', error.response?.status, error.response?.data || error.message);
     return Promise.reject(error);
   }
 );

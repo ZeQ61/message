@@ -6,6 +6,7 @@ import com.example.chatapp.dto.ProfileUpdateRequest;
 import com.example.chatapp.dto.RegisterRequest;
 import com.example.chatapp.dto.StatusUpdateRequest;
 import com.example.chatapp.model.User;
+import com.example.chatapp.repository.UserRepository;
 import com.example.chatapp.service.JwtService;
 import com.example.chatapp.service.UserService;
 import com.example.chatapp.service.FriendshipService;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +47,9 @@ public class UserController {
 
     @Autowired
     private FriendshipService friendshipService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @PostMapping("/login")
     public String showLoginForm(@RequestBody LoginRequest loginrequest) throws Exception {
@@ -179,17 +184,26 @@ public class UserController {
     // Kullanıcıları kullanıcı adına göre ara - Sadece arkadaşlar arasında
     @GetMapping("/search")
     public ResponseEntity<?> searchUsers(@RequestParam String username, @AuthenticationPrincipal UserDetails userDetails) {
-        String currentUsername = userDetails.getUsername();
-        User currentUser = userService.findByUsername(currentUsername);
-        
-        if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Kullanıcı bulunamadı"));
+        try {
+            if (userDetails == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Yetkilendirme başarısız"));
+            }
+            
+            String currentUsername = userDetails.getUsername();
+            User currentUser = userService.findByUsername(currentUsername);
+            
+            if (currentUser == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Kullanıcı bulunamadı"));
+            }
+            
+            // Sadece kullanıcının arkadaş listesinde olan kullanıcılar arasında ara
+            List<User> friends = friendshipService.searchFriends(currentUser, username);
+            
+            return ResponseEntity.ok(friends);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Kullanıcı arama hatası: " + e.getMessage()));
         }
-        
-        // Sadece kullanıcının arkadaş listesinde olan kullanıcılar arasında ara
-        List<User> friends = friendshipService.searchFriends(currentUser, username);
-        
-        return ResponseEntity.ok(friends);
     }
 
     // Tüm kullanıcıların profil resimlerini düzelt (admin için)

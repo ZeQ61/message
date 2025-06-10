@@ -6,8 +6,8 @@ import { useAuth } from '../context/AuthContext';
 import Layout from '../components/Layout';
 import Toast from '../components/Toast';
 import groupService from '../services/groupService';
-import '../styles/groups.scss';
 import api from '../services/api';
+import '../styles/groups.scss';
 
 const Groups = () => {
   const { user } = useAuth();
@@ -182,11 +182,27 @@ const Groups = () => {
     setIsSearching(true);
     
     try {
-      // API servisi üzerinden kullanıcı araması yap
-      const response = await api.get(`/api/users/search?username=${encodeURIComponent(username)}`);
-      setSearchResults(response.data);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('Kullanıcı kimliği doğrulanamadı');
+        setSearchResults([]);
+        return;
+      }
+      
+      // API servisini kullanarak güvenli istek gönder
+      const response = await api.get('/users/search', {
+        params: {
+          username: encodeURIComponent(username)
+        },
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      console.log("Arkadaş arama sonuçları:", response.data);
+      setSearchResults(response.data || []);
     } catch (error) {
-      console.error('Kullanıcı arama hatası:', error);
+      console.error('Kullanıcı arama hatası:', error.message || error);
       setSearchResults([]);
     } finally {
       setIsSearching(false);

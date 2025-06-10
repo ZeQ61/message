@@ -18,7 +18,7 @@ public class CorsConfig implements WebMvcConfigurer {
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                 .allowedHeaders("*")
                 .exposedHeaders("Authorization")
-                .allowCredentials(true)
+                .allowCredentials(false)
                 .maxAge(3600);
 
         System.out.println("CORS configuration applied for specific origins");
@@ -33,7 +33,7 @@ public class CorsConfig implements WebMvcConfigurer {
         config.addAllowedOrigin("http://localhost:3000");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
-        config.setAllowCredentials(true);
+        config.setAllowCredentials(false);
         
         source.registerCorsConfiguration("/**", config);
         source.registerCorsConfiguration("/ws/**", config);
