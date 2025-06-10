@@ -60,7 +60,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(@NonNull StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("http://localhost:3000", "https://frontend-nyj1cfgeg-zeki14-icloudcoms-projects.vercel.app")
+                .setAllowedOrigins("http://localhost:3000", "https://frontend-gamma-six-67.vercel.app","https://frontend-nyj1cfgeg-zeki14-icloudcoms-projects.vercel.app")
                 .withSockJS();
 
         logger.info("WebSocket endpoint kaydedildi: /ws (SockJS ile)");
