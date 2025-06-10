@@ -105,7 +105,7 @@ public class UserService {
         user.setCreatedAt(LocalDateTime.now());
         user.setIsim(registerRequest.getIsim());
         user.setSoyad(registerRequest.getSoyad());
-        user.setProfileImageUrl("https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.vecteezy.com%2Ffree-vector%2Fdefault-user&psig=AOvVaw0bf3KnP0ZkMsPPFwmYLR_q&ust=1746032747378000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCOjfkIDd_YwDFQAAAAAdAAAAABAE");
+        user.setProfileImageUrl("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjYzVkNWVhIi8+PHRleHQgeD0iNTAiIHk9IjUwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGZpbGw9IiMzYzU2OGEiPj88L3RleHQ+PC9zdmc+");
         user.setOnline(false);
         user.setUpdatedAt(null);
         user.setUsername(registerRequest.getUsername());
@@ -471,6 +471,29 @@ public class UserService {
         String username = authentication.getName();
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kullanıcı bulunamadı"));
+    }
+
+    // Tüm kullanıcıların profil resimlerini varsayılan data URL'sine güncelle
+    public void fixAllProfileImages() {
+        // Tüm kullanıcıları getir
+        List<User> allUsers = userRepository.findAll();
+        
+        // Varsayılan profil resmi (data URL formatında svg)
+        String defaultProfileImage = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjYzVkNWVhIi8+PHRleHQgeD0iNTAiIHk9IjUwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGZpbGw9IiMzYzU2OGEiPj88L3RleHQ+PC9zdmc+";
+        
+        // İşlenmemiş veya Google URL'si olan profil resimlerini düzelt
+        for (User user : allUsers) {
+            String currentUrl = user.getProfileImageUrl();
+            
+            // Eğer resim URL'si boş, null veya Google URL'si içeriyorsa değiştir
+            if (currentUrl == null || currentUrl.isEmpty() || 
+                currentUrl.contains("google.com") || 
+                currentUrl.contains("vecteezy.com")) {
+                
+                user.setProfileImageUrl(defaultProfileImage);
+                userRepository.save(user);
+            }
+        }
     }
 }
 

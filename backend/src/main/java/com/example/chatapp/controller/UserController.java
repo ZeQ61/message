@@ -8,6 +8,7 @@ import com.example.chatapp.dto.StatusUpdateRequest;
 import com.example.chatapp.model.User;
 import com.example.chatapp.service.JwtService;
 import com.example.chatapp.service.UserService;
+import com.example.chatapp.service.FriendshipService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,9 @@ public class UserController {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private FriendshipService friendshipService;
 
     @PostMapping("/login")
     public String showLoginForm(@RequestBody LoginRequest loginrequest) throws Exception {
@@ -172,7 +176,7 @@ public class UserController {
         }
     }
 
-    // Kullanıcıları kullanıcı adına göre ara
+    // Kullanıcıları kullanıcı adına göre ara - Sadece arkadaşlar arasında
     @GetMapping("/search")
     public ResponseEntity<?> searchUsers(@RequestParam String username, @AuthenticationPrincipal UserDetails userDetails) {
         String currentUsername = userDetails.getUsername();
@@ -182,13 +186,21 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Kullanıcı bulunamadı"));
         }
         
-        List<User> users = userService.searchByUsername(username);
+        // Sadece kullanıcının arkadaş listesinde olan kullanıcılar arasında ara
+        List<User> friends = friendshipService.searchFriends(currentUser, username);
         
-        // Kendini sonuçlardan çıkar
-        users = users.stream()
-            .filter(user -> !user.getUsername().equals(currentUsername))
-            .collect(Collectors.toList());
-        
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(friends);
+    }
+
+    // Tüm kullanıcıların profil resimlerini düzelt (admin için)
+    @GetMapping("/fix-profile-images")
+    public ResponseEntity<?> fixProfileImages() {
+        try {
+            userService.fixAllProfileImages();
+            return ResponseEntity.ok(Map.of("message", "Tüm profil resimleri başarıyla güncellendi"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Profil resimleri güncellenirken hata oluştu: " + e.getMessage()));
+        }
     }
 }

@@ -7,6 +7,7 @@ import Layout from '../components/Layout';
 import Toast from '../components/Toast';
 import groupService from '../services/groupService';
 import '../styles/groups.scss';
+import api from '../services/api';
 
 const Groups = () => {
   const { user } = useAuth();
@@ -181,19 +182,9 @@ const Groups = () => {
     setIsSearching(true);
     
     try {
-      const response = await fetch(`https://backend-gq5v.onrender.com/api/users/search?username=${encodeURIComponent(username)}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Kullanıcı arama hatası');
-      }
-      
-      const data = await response.json();
-      setSearchResults(data);
+      // API servisi üzerinden kullanıcı araması yap
+      const response = await api.get(`/api/users/search?username=${encodeURIComponent(username)}`);
+      setSearchResults(response.data);
     } catch (error) {
       console.error('Kullanıcı arama hatası:', error);
       setSearchResults([]);

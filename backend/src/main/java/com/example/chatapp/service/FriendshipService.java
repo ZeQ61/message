@@ -266,4 +266,38 @@ public class FriendshipService {
         return friendshipRepository.existsByRequesterAndReceiverAndStatus(user1, user2, Friendship.FriendshipStatus.ACCEPTED) ||
                friendshipRepository.existsByRequesterAndReceiverAndStatus(user2, user1, Friendship.FriendshipStatus.ACCEPTED);
     }
+    
+    // Kullanıcının arkadaşları arasında arama yap
+    public List<User> searchFriends(User currentUser, String query) {
+        if (query == null || query.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        // Kullanıcının tüm arkadaşlıklarını getir
+        List<Friendship> acceptedAsSender = friendshipRepository.findByRequesterAndStatus(currentUser, Friendship.FriendshipStatus.ACCEPTED);
+        List<Friendship> acceptedAsReceiver = friendshipRepository.findByReceiverAndStatus(currentUser, Friendship.FriendshipStatus.ACCEPTED);
+        
+        // Tüm arkadaşları bir listeye topla
+        List<User> allFriends = new ArrayList<>();
+        
+        // Gönderici olduğu arkadaşlıklarda arkadaş alıcıdır
+        for (Friendship friendship : acceptedAsSender) {
+            allFriends.add(friendship.getReceiver());
+        }
+        
+        // Alıcı olduğu arkadaşlıklarda arkadaş göndericidir
+        for (Friendship friendship : acceptedAsReceiver) {
+            allFriends.add(friendship.getRequester());
+        }
+        
+        // Arkadaşlar arasında arama yap
+        return allFriends.stream()
+            .filter(friend -> 
+                friend.getUsername().toLowerCase().contains(query.toLowerCase()) || 
+                (friend.getIsim() != null && friend.getIsim().toLowerCase().contains(query.toLowerCase())) ||
+                (friend.getSoyad() != null && friend.getSoyad().toLowerCase().contains(query.toLowerCase())) ||
+                (friend.getEmail() != null && friend.getEmail().toLowerCase().contains(query.toLowerCase()))
+            )
+            .collect(Collectors.toList());
+    }
 } 
