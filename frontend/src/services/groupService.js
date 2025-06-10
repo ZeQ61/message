@@ -3,27 +3,8 @@ import api from './api';
 
 const API_URL = 'https://backend-gq5v.onrender.com';
 
-// Grup API servisi
-const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// İstek interceptor'ü
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+// Grup API servisi - Bu tanımlama kaldırıldı çünkü zaten api import edildi
+// Servisleri api ile çağıracağız
 
 // Grup servisi
 const groupService = {
