@@ -9,22 +9,47 @@ import '../styles/auth.scss';
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const { login } = useAuth();
+  const [formError, setFormError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  
+  const { login, error, loading } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
-    if (!username || !password) {
-      setError('Lütfen tüm alanları doldurun.');
+    
+    if (!username.trim() || !password.trim()) {
+      setFormError('Kullanıcı adı ve şifre gereklidir');
       return;
     }
-
-    const success = await login(username, password);
-    if (success) {
-      navigate('/');
-    } else {
-      setError('Kullanıcı adı veya şifre hatalı.');
+    
+    try {
+      setSubmitting(true);
+      setFormError(null);
+      
+      console.log('Giriş işlemi başlatılıyor...');
+      const success = await login(username, password);
+      
+      if (success) {
+        console.log('Giriş başarılı, yönlendiriliyor...');
+        navigate('/message');
+      } else {
+        // login fonksiyonu zaten error state'i ayarladığı için
+        // burada ek bir şey yapmaya gerek yok
+        console.error('Giriş başarısız');
+      }
+    } catch (error) {
+      console.error('Giriş hatası:', error);
+      
+      if (error.code === 'ECONNABORTED') {
+        setFormError('Sunucu yanıt vermiyor. Lütfen daha sonra tekrar deneyin.');
+      } else if (error.response) {
+        setFormError(`Hata: ${error.response.data || 'Bilinmeyen hata'}`);
+      } else {
+        setFormError(`Bir hata oluştu: ${error.message}`);
+      }
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -52,18 +77,29 @@ const Login = () => {
           Giriş Yap
         </motion.h3>
 
-        {error && (
+        {formError && (
           <motion.div 
             className="error-message"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {formError}
+          </motion.div>
+        )}
+
+        {error && !formError && (
+          <motion.div 
+            className="error-message"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
             {error}
           </motion.div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={onSubmit}>
           <motion.div 
             className="form-group"
             initial={{ opacity: 0, y: 10 }}
@@ -100,16 +136,14 @@ const Login = () => {
             />
           </motion.div>
 
-          <motion.button 
-            type="submit" 
-            className="btn-primary"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.5 }}
+          <motion.button
+            type="submit"
+            className="primary-button"
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
+            disabled={submitting || loading}
           >
-            Giriş Yap
+            {loading || submitting ? 'Giriş Yapılıyor...' : 'Giriş Yap'}
           </motion.button>
         </form>
 

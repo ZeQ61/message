@@ -9,7 +9,7 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: true,
-  timeout: 10000, // 10 saniye
+  timeout: 30000, // 30 saniye (artırıldı)
 });
 
 // Admin API'si (ayrı bir instance)
@@ -19,7 +19,7 @@ const adminApi = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: true,
-  timeout: 10000, // 10 saniye
+  timeout: 30000, // 30 saniye (artırıldı)
 });
 
 // Normal kullanıcı istekleri için interceptor
@@ -42,7 +42,15 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    console.error('API Hatası:', error.response?.status, error.response?.data || error.message);
+    if (error.code === 'ECONNABORTED') {
+      console.error('API İsteği zaman aşımına uğradı:', error.config?.url || 'Bilinmeyen URL');
+    } else if (error.response) {
+      console.error('API Hatası:', error.response.status, error.response.data || error.message);
+    } else if (error.request) {
+      console.error('API İsteği yapıldı ancak yanıt alınamadı:', error.request);
+    } else {
+      console.error('API İsteği sırasında beklenmeyen hata:', error.message);
+    }
     return Promise.reject(error);
   }
 );
