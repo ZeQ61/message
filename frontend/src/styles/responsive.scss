@@ -1,0 +1,146 @@
+/* Responsive Styles */
+
+/* Mobil cihazlar için medya sorguları */
+@mixin mobile {
+  @media (max-width: 767px) {
+    @content;
+  }
+}
+
+/* Tablet cihazlar için medya sorguları */
+@mixin tablet {
+  @media (min-width: 768px) and (max-width: 1023px) {
+    @content;
+  }
+}
+
+/* Mobil ve tablet cihazları kapsayan medya sorgusu */
+@mixin mobile-tablet {
+  @media (max-width: 1023px) {
+    @content;
+  }
+}
+
+/* Genel responsive düzenlemeler */
+.hide-on-mobile {
+  @include mobile {
+    display: none !important;
+  }
+}
+
+.show-on-mobile {
+  display: none !important;
+  @include mobile {
+    display: block !important;
+  }
+}
+
+/* Mobil menü toggle butonu */
+.mobile-menu-toggle {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1001;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px var(--shadow-color);
+  
+  @include mobile {
+    display: flex !important;
+  }
+  
+  &:focus {
+    outline: none;
+  }
+}
+
+/* Mobil için ana container düzenlemeleri */
+.home-container {
+  @include mobile {
+    flex-direction: column;
+    height: auto;
+    overflow-x: hidden;
+  }
+  
+  .sidebar {
+    @include mobile {
+      position: fixed;
+      left: -100%;
+      z-index: 1000;
+      width: 80%;
+      max-width: 300px;
+      transition: left 0.3s ease;
+      height: 100vh;
+      
+      &.mobile-open {
+        left: 0;
+      }
+    }
+  }
+  
+  .main-content {
+    @include mobile {
+      margin-left: 0;
+      width: 100%;
+      padding: 1rem;
+      padding-top: 60px; /* Mobil menü için üst boşluk */
+    }
+  }
+}
+
+/* Mobil form elemanları */
+.form-control, input, textarea, select, button {
+  @include mobile {
+    font-size: 16px !important; /* iOS zoom sorununu önlemek için */
+  }
+}
+
+.btn {
+  @include mobile {
+    padding: 0.6rem 1rem;
+  }
+}
+
+/* Mobil diğer genel düzenlemeler */
+h1, h2, h3 {
+  @include mobile {
+    font-size: 90%;
+  }
+}
+
+/* ThemeToggle butonu için mobil düzenleme */
+.theme-toggle {
+  @include mobile {
+    top: 1rem;
+    right: 1rem;
+    width: 35px;
+    height: 35px;
+  }
+}
+
+/* Mobil overlay - sidebar açıldığında arka planı karartma */
+.mobile-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  
+  @include mobile {
+    &.active {
+      display: block;
+    }
+  }
+}

@@ -1,0 +1,132 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import './styles/responsive.scss';
+
+// Ana renk değişkenleri CSS değişkenleri üzerinden oluşturulur - iyileştirilmiş kontrast
+$primary-color: var(--accent-color);
+$primary-light: var(--bg-secondary);
+$primary-dark: var(--text-primary);
+$accent-color: var(--accent-color);
+$text-dark: var(--text-primary);
+$text-light: var(--text-secondary);
+
+body {
+  font-family: 'Poppins', sans-serif;
+  
+  @include mobile {
+    font-size: 14px;
+  }
+}
+
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+  
+  @include mobile {
+    height: 30vmin;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: var(--bg-secondary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: var(--text-primary);
+  
+  @include mobile {
+    font-size: calc(10px + 1.5vmin);
+    padding: 0 15px;
+  }
+}
+
+.App-link {
+  color: var(--accent-color);
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Ek genel stiller */
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--accent-color);
+  color: var(--button-text);
+  
+  @include mobile {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px var(--shadow-color);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+/* Tema değiştirme butonu stili - iyileştirilmiş görünürlük */
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px var(--shadow-color);
+  z-index: 1000;
+  transition: all 0.3s ease;
+  
+  @include mobile {
+    top: 15px;
+    right: 15px;
+    width: 35px;
+    height: 35px;
+  }
+  
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px var(--shadow-color);
+    background-color: var(--accent-color);
+    color: var(--button-text);
+  }
+  
+  &:active {
+    transform: scale(0.9);
+  }
+}

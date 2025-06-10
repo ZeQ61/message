@@ -1,0 +1,104 @@
+:root {
+  /* Gündüz modu (varsayılan) değişkenleri - daha dengeli kontrast */
+  --bg-primary: #f8f9fa;
+  --bg-secondary: #ffffff;
+  --text-primary: #212529;
+  --text-secondary: #495057;
+  --accent-color: #3f72af;
+  --border-color: #dee2e6;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --input-bg: #ffffff;
+  --button-text: #ffffff;
+  --sidebar-bg: #3f72af;
+  --sidebar-text: #ffffff;
+  --sidebar-hover: rgba(255, 255, 255, 0.15);
+  --card-bg: #ffffff;
+  --message-own-text: #ffffff; /* Kendi mesajlarının metin rengi - Beyaz renk */
+  --message-own-bg: #3f72af; /* Kendi mesajlarının arka plan rengi - Ana mavi renk */
+  --message-other-bg: #e9e9e9; /* Diğer mesajların arka plan rengi - Açık gri */
+  --message-other-text: #212529; /* Diğer mesajların metin rengi - Koyu renk */
+  --message-shadow: rgba(0, 0, 0, 0.1); /* Mesaj gölge rengi - aydınlık tema */
+}
+
+.dark {
+  /* Gece modu değişkenleri - yüksek kontrast ve daha iyi okunabilirlik */
+  --bg-primary: #121212;
+  --bg-secondary: #1e1e1e;
+  --text-primary: #e9ecef;
+  --text-secondary: #adb5bd;
+  --accent-color: #4f94e0;
+  --border-color: #343a40;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --input-bg: #2c2c2c;
+  --button-text: #ffffff;
+  --sidebar-bg: #1e1e1e;
+  --sidebar-text: #e9ecef;
+  --sidebar-hover: rgba(255, 255, 255, 0.1);
+  --card-bg: #2c2c2c;
+  --message-own-text: #ffffff; /* Kendi mesajlarının metin rengi - Beyaz renk */
+  --message-own-bg: #2b5278; /* Kendi mesajlarının arka plan rengi - Koyu mavi */
+  --message-other-bg: #2c2c2c; /* Diğer mesajların arka plan rengi - Koyu gri */
+  --message-other-text: #e9ecef; /* Diğer mesajların metin rengi - Açık renk */
+  --message-shadow: rgba(0, 0, 0, 0.25); /* Mesaj gölge rengi - karanlık tema */
+}
+
+/* Tema geçişi için animasyon */
+.theme-transition {
+  transition: background-color 0.5s ease,
+              color 0.5s ease,
+              border-color 0.5s ease,
+              box-shadow 0.5s ease;
+}
+
+/* Butonlar için daha iyi kontrast */
+.dark button.btn-primary,
+.dark .btn-primary {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* Sidebar'daki aktif elemanlar için daha iyi kontrast */
+.dark .sidebar li.active button {
+  background-color: rgba(79, 148, 224, 0.3);
+  color: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Karanlık modda linkler için daha iyi görünürlük */
+.dark a {
+  color: var(--accent-color);
+}
+
+.dark .auth-form-container h2,
+.dark .auth-form-container h3 {
+  color: var(--text-primary);
+}

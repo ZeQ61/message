@@ -1,0 +1,5 @@
+2025-06-10 19:32:28,009 INFO c.e.c.c.WebSocketConfig [main] WebSocket mesaj brokeri yapılandırıldı:
+2025-06-10 19:32:28,010 DEBUG c.e.c.c.WebSocketConfig [main] - Broker ön ekleri: /topic, /queue, /user
+2025-06-10 19:32:28,010 DEBUG c.e.c.c.WebSocketConfig [main] - Uygulama hedef ön eki: /app
+2025-06-10 19:32:28,011 DEBUG c.e.c.c.WebSocketConfig [main] - Kullanıcı hedef ön eki: /user
+2025-06-10 19:32:28,596 INFO c.e.c.c.WebSocketConfig [main] WebSocket endpoint kaydedildi: /ws (SockJS ile)

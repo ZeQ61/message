@@ -1,0 +1,155 @@
+@import './responsive.scss';
+
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  
+  @include mobile {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    align-items: stretch;
+  }
+}
+
+.toast {
+  min-width: 300px;
+  margin-bottom: 10px;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  animation: slideIn 0.3s ease forwards;
+  
+  @include mobile {
+    min-width: auto;
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 8px;
+  }
+  
+  &.success {
+    background-color: #4caf50;
+    color: white;
+  }
+  
+  &.error {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  &.info {
+    background-color: #2196f3;
+    color: white;
+  }
+  
+  &.warning {
+    background-color: #ff9800;
+    color: white;
+  }
+  
+  .toast-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    
+    .toast-icon {
+      margin-right: 12px;
+      font-size: 20px;
+      
+      @include mobile {
+        font-size: 18px;
+        margin-right: 10px;
+      }
+    }
+    
+    .toast-message {
+      font-weight: 500;
+      font-size: 0.95rem;
+      
+      @include mobile {
+        font-size: 0.85rem;
+      }
+    }
+  }
+  
+  .toast-close {
+    background: none;
+    border: none;
+    color: inherit;
+    opacity: 0.7;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 0;
+    margin-left: 15px;
+    display: flex;
+    align-items: center;
+    transition: opacity 0.2s;
+    
+    @include mobile {
+      font-size: 18px;
+      margin-left: 10px;
+    }
+    
+    &:hover {
+      opacity: 1;
+    }
+  }
+  
+  &.exiting {
+    animation: slideOut 0.3s ease forwards;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@include mobile {
+  @keyframes slideIn {
+    from {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideOut {
+    from {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+  }
+}

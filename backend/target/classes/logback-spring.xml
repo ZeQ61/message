@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property name="LOGS" value="./logs" />
+
+    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{ISO8601} %highlight(%-5level) [%blue(%t)] %yellow(%C{1}): %msg%n%throwable</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS}/spring-boot-logger.log</file>
+        <encoder>
+            <pattern>%d %p %C{1} [%t] %m%n</pattern>
+        </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS}/archived/spring-boot-logger-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+    </appender>
+    
+    <!-- Özel appender: Güvenlikle ilgili loglar için -->
+    <appender name="SecurityAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS}/security.log</file>
+        <encoder>
+            <pattern>%d %p %C{1} [%t] %m%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS}/archived/security-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Özel appender: WebSocket işlemleri için -->
+    <appender name="WebSocketAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS}/websocket.log</file>
+        <encoder>
+            <pattern>%d %p %C{1} [%t] %m%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS}/archived/websocket-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Özel logger: Güvenlik için -->
+    <logger name="com.example.chatapp.config.SecurityConfig" level="debug" additivity="false">
+        <appender-ref ref="SecurityAppender" />
+        <appender-ref ref="Console" />
+    </logger>
+    
+    <logger name="com.example.chatapp.config.JwtAuthenticationFilter" level="debug" additivity="false">
+        <appender-ref ref="SecurityAppender" />
+        <appender-ref ref="Console" />
+    </logger>
+    
+    <!-- Özel logger: WebSocket işlemleri için -->
+    <logger name="com.example.chatapp.websocket" level="debug" additivity="false">
+        <appender-ref ref="WebSocketAppender" />
+        <appender-ref ref="Console" />
+    </logger>
+    
+    <logger name="com.example.chatapp.config.WebSocketConfig" level="debug" additivity="false">
+        <appender-ref ref="WebSocketAppender" />
+        <appender-ref ref="Console" />
+    </logger>
+
+    <!-- LOG everything at INFO level -->
+    <root level="info">
+        <appender-ref ref="RollingFile" />
+        <appender-ref ref="Console" />
+    </root>
+
+    <!-- LOG "com.example.chatapp*" at DEBUG level -->
+    <logger name="com.example.chatapp" level="debug" additivity="false">
+        <appender-ref ref="RollingFile" />
+        <appender-ref ref="Console" />
+    </logger>
+
+</configuration> 
