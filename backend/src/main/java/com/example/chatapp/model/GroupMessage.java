@@ -25,6 +25,10 @@ public class GroupMessage {
     private LocalDateTime timestamp = LocalDateTime.now();
     
     private boolean isDeleted = false;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MessageType type = MessageType.MESSAGE;
 
     // Constructor
     public GroupMessage() {}
@@ -34,6 +38,15 @@ public class GroupMessage {
         this.group = group;
         this.content = content;
         this.timestamp = LocalDateTime.now();
+        this.type = MessageType.MESSAGE;
+    }
+    
+    public GroupMessage(User sender, Group group, String content, MessageType type) {
+        this.sender = sender;
+        this.group = group;
+        this.content = content;
+        this.timestamp = LocalDateTime.now();
+        this.type = type;
     }
 
     // Getter ve Setter'lar
@@ -83,5 +96,13 @@ public class GroupMessage {
     
     public void setDeleted(boolean isDeleted) {
         this.isDeleted = isDeleted;
+    }
+    
+    public MessageType getType() {
+        return type;
+    }
+    
+    public void setType(MessageType type) {
+        this.type = type;
     }
 } 

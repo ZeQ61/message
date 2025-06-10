@@ -4,6 +4,7 @@ com\example\chatapp\controller\ChatController.class
 com\example\chatapp\websocket\ChatWebSocketController$MessageType.class
 com\example\chatapp\websocket\ChatWebSocketController.class
 com\example\chatapp\controller\GroupController.class
+com\example\chatapp\model\MessageType.class
 com\example\chatapp\websocket\WebSocketMessageDispatcher.class
 com\example\chatapp\config\CorsConfig.class
 com\example\chatapp\messaging\RedisMessagePublisher.class

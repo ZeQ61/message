@@ -99,56 +99,45 @@ export const connectWebSocket = () => {
     }
     
     try {
-      console.log('SockJS bağlantısı oluşturuluyor:', SOCKET_URL);
-      
-      // SockJS için global error handler
-      window.onerror = function(message, source, lineno, colno, error) {
-        console.error('Global error yakalandı:', { message, source, lineno, colno, error });
-        if (source && source.includes('sockjs')) {
-          console.error('SockJS bağlantısı ile ilgili bir hata oluştu:', message);
-          
-          // Mobil için ek bilgi
-          if (isMobile) {
-            console.error('Mobil cihazda SockJS global hatası:', error);
-          }
-        }
-        // Normal hata işlemeye devam et
-        return false;
-      };
+      console.log('SockJS bağlantısı hazırlanıyor:', SOCKET_URL);
       
       // SockJS transport kontrolleri
       const sockJsTransportOptions = {
         transports: ['websocket', 'xhr-streaming', 'xhr-polling']
       };
       
-      // SockJS bağlantısı kur
-      const socket = new SockJS(SOCKET_URL, null, sockJsTransportOptions);
-      
-      // WebSocket'in withCredentials özelliğini true olarak ayarla
-      socket.withCredentials = true;
-      
-      socket.onopen = () => {
-        console.log('SockJS bağlantısı açıldı');
-        console.log('Transport tipi:', socket._transport ? socket._transport.transportName : 'bilinmiyor');
-        console.log('Credentials gönderiliyor mu:', socket.withCredentials ? 'Evet' : 'Hayır');
-      };
-      
-      socket.onclose = (event) => {
-        console.log('SockJS bağlantısı kapandı:', event);
-        console.log('Bağlantı neden kapandı:', event.reason || 'bilinmiyor');
-      };
-      
-      socket.onerror = (error) => {
-        console.error('SockJS bağlantı hatası:', error);
-        // Mobil için ek hata bilgisi
-        if (isMobile) {
-          console.error('Mobil cihazda WebSocket bağlantı hatası. Detaylar:', error);
-        }
-      };
-      
       // Stomp client oluştur
       stompClient = new Client({
-        webSocketFactory: () => socket,
+        // WebSocket fabrikası fonksiyonu düzeltildi
+        webSocketFactory: () => {
+          console.log('WebSocket fabrikası oluşturuluyor...');
+          // Yeni SockJS bağlantısı oluştur
+          const sockJsInstance = new SockJS(SOCKET_URL, null, sockJsTransportOptions);
+          // withCredentials ayarını etkinleştir
+          sockJsInstance.withCredentials = true;
+          
+          // Bağlantı event handler'ları
+          sockJsInstance.onopen = () => {
+            console.log('SockJS bağlantısı açıldı');
+            console.log('Transport tipi:', sockJsInstance._transport ? sockJsInstance._transport.transportName : 'bilinmiyor');
+            console.log('Credentials gönderiliyor mu:', sockJsInstance.withCredentials ? 'Evet' : 'Hayır');
+          };
+          
+          sockJsInstance.onclose = (event) => {
+            console.log('SockJS bağlantısı kapandı:', event);
+            console.log('Bağlantı neden kapandı:', event.reason || 'bilinmiyor');
+          };
+          
+          sockJsInstance.onerror = (error) => {
+            console.error('SockJS bağlantı hatası:', error);
+            // Mobil için ek hata bilgisi
+            if (isMobile) {
+              console.error('Mobil cihazda WebSocket bağlantı hatası. Detaylar:', error);
+            }
+          };
+          
+          return sockJsInstance;
+        },
         debug: (str) => {
           // Debug modda logları göster, üretimde kapatılabilir
           console.debug('STOMP:', str);
@@ -204,72 +193,30 @@ export const connectWebSocket = () => {
         
         // Mobil için ek hata bilgisi
         if (isMobile) {
-          console.error('Mobil cihazda STOMP hatası. Daha fazla detay:', frame);
+          console.error('Mobil cihazda STOMP hatası:', frame);
         }
         
+        // STOMP hatası - başarısız
         reject(new Error(errorMsg));
+      };
+      
+      // Bağlantı başarısız olduğunda
+      stompClient.onWebSocketError = (event) => {
+        console.error('WebSocket hatası:', event);
+        reject(new Error('WebSocket bağlantı hatası'));
       };
       
       // Bağlantı kesildiğinde
       stompClient.onWebSocketClose = (event) => {
-        console.warn('WebSocket bağlantısı kesildi:', event);
-        // Kullanıcıya bağlantı kesildi bildirimi gösterebilirsiniz
-        // Burada UI'da bir bildirim göstermek için bir callback çağrılabilir
-        
-        // Mobil için ek bilgi
-        if (isMobile) {
-          console.warn('Mobil cihazda WebSocket bağlantısı kesildi. Detaylar:', event);
-        }
-        
-        // Otomatik yeniden bağlanma (stompClient içinde yapılandırıldı)
+        console.log('WebSocket bağlantısı kesildi:', event);
       };
       
-      // WebSocket hata durumunda
-      stompClient.onWebSocketError = (event) => {
-        console.error('WebSocket hatası:', event);
-        // Kullanıcıya bağlantı hatası bildirimi gösterebilirsiniz
-        
-        // Mobil için ek bilgi
-        if (isMobile) {
-          console.error('Mobil cihazda WebSocket hatası. Detaylar:', event);
-        }
-      };
-
-      // Bağlantıyı başlat
-      stompClient.activate();
+      // Bağlantıyı aktifleştir
       console.log('WebSocket bağlantısı aktifleştiriliyor...');
-      
-      // 15 saniye içinde bağlantı kurulmazsa timeout
-      setTimeout(() => {
-        if (stompClient && !stompClient.active) {
-          const timeoutError = new Error('WebSocket bağlantısı zaman aşımına uğradı');
-          console.error(timeoutError.message);
-          
-          // Mobil için ek bilgi
-          if (isMobile) {
-            console.error('Mobil cihazda WebSocket bağlantı zaman aşımı');
-          }
-          
-          // Maksimum deneme sayısına ulaşıldıysa, hata döndür
-          if (connectAttempts >= MAX_CONNECT_ATTEMPTS) {
-            console.error(`Maksimum bağlantı deneme sayısına (${MAX_CONNECT_ATTEMPTS}) ulaşıldı. Daha fazla denenmeyecek.`);
-            reject(timeoutError);
-          } else {
-            // Otomatik tekrar deneme
-            console.log(`Bağlantı başarısız oldu. Tekrar deneniyor... (${connectAttempts}/${MAX_CONNECT_ATTEMPTS})`);
-            connectWebSocket().then(resolve).catch(reject);
-          }
-        }
-      }, 15000);
+      stompClient.activate();
       
     } catch (error) {
       console.error('WebSocket bağlantısı kurulurken hata:', error);
-      
-      // Mobil için ek bilgi
-      if (isMobile) {
-        console.error('Mobil cihazda WebSocket bağlantı kurulurken hata:', error);
-      }
-      
       reject(error);
     }
   });
@@ -899,61 +846,61 @@ export const getWebSocketConnection = () => {
   });
 };
 
-// Grup mesaj güncellemelerini dinleme
+// Grup mesajları için abonelik
 const subscribeToGroupMessages = () => {
   if (!stompClient || !stompClient.connected) {
-    console.warn('Grup mesajları için WebSocket bağlantısı kurulamadı');
+    console.error('Grup mesajlarına abone olunamıyor - WebSocket bağlantısı yok');
     return;
   }
-
+  
   try {
-    // Varolan aboneliği temizle
+    // Eski aboneliği temizle
     if (groupMessageSubscription) {
       groupMessageSubscription.unsubscribe();
       groupMessageSubscription = null;
     }
-
-    // Kullanıcının kendi ID'sini al
+    
+    // Kullanıcı bilgilerini al
     let userId;
     try {
       const user = JSON.parse(localStorage.getItem('user'));
-      if (user && user.id) {
-        userId = user.id;
-      } else {
+      userId = user?.id;
+      if (!userId) {
         console.warn('Kullanıcı ID bulunamadı, grup mesaj aboneliği yapılamıyor');
         return;
       }
     } catch (e) {
-      console.error('Kullanıcı bilgisi alınamadı:', e);
+      console.error('Kullanıcı bilgileri alınamadı:', e);
       return;
     }
-
-    // Kullanıcıya gelen grup mesajlarını dinleme
-    groupMessageSubscription = stompClient.subscribe(
-      `/user/${userId}/queue/group-messages`,
-      (messageOutput) => {
-        try {
-          console.log('Yeni grup mesajı alındı:', messageOutput);
-          const message = JSON.parse(messageOutput.body);
-          console.log('İşlenmiş grup mesajı:', message);
-          
-          // Tüm grup mesaj callback'lerini çağır
-          groupMessageCallbacks.forEach(callback => {
-            try {
-              callback(message);
-            } catch (callbackError) {
-              console.error('Grup mesaj callback hatası:', callbackError);
-            }
-          });
-        } catch (parseError) {
-          console.error('Grup mesajı işlenirken hata:', parseError);
-        }
+    
+    console.log('Grup mesajları için abonelik başlatılıyor...');
+    
+    // Genel grup mesajları için abone ol
+    groupMessageSubscription = stompClient.subscribe('/topic/group-messages', (message) => {
+      // Grup mesajını al
+      try {
+        const groupMessage = JSON.parse(message.body);
+        
+        console.log('Grup mesajı alındı:', groupMessage);
+        
+        // Callback'leri çağır
+        groupMessageCallbacks.forEach(callback => {
+          try {
+            callback(groupMessage);
+          } catch (callbackError) {
+            console.error('Grup mesajı callback hatası:', callbackError);
+          }
+        });
+      } catch (parseError) {
+        console.error('Grup mesajı işlenirken hata:', parseError);
       }
-    );
-
-    console.log('Grup mesajları için abonelik başarılı');
+    });
+    
+    console.log('Grup mesajlarına başarıyla abone olundu');
+    
   } catch (error) {
-    console.error('Grup mesajları için abonelik hatası:', error);
+    console.error('Grup mesajlarına abone olunurken hata:', error);
   }
 };
 
@@ -976,48 +923,82 @@ export const removeGroupMessageListener = (callback) => {
 
 // Grup mesajı gönder
 export const sendGroupMessage = async (groupId, content) => {
-  return new Promise((resolve, reject) => {
-    if (!stompClient || !stompClient.connected) {
-      console.error('WebSocket bağlantısı kurulmadı - grup mesajı gönderilemiyor');
-      return reject(new Error('WebSocket bağlantısı yok'));
-    }
-
-    // Kullanıcı bilgilerini al
-    let userId, username;
+  return new Promise(async (resolve, reject) => {
     try {
-      const user = JSON.parse(localStorage.getItem('user'));
-      if (user) {
-        userId = user.id;
-        username = user.username;
-      } else {
-        console.error('Kullanıcı bilgileri bulunamadı - grup mesajı gönderilemiyor');
-        return reject(new Error('Kullanıcı bilgileri bulunamadı'));
-      }
-    } catch (e) {
-      console.error('Kullanıcı bilgileri alınamadı:', e);
-      return reject(new Error('Kullanıcı bilgileri alınamadı'));
-    }
-
-    try {
-      const messageToSend = {
-        groupId: groupId,
-        senderId: userId,
-        senderUsername: username,
-        content: content,
-        timestamp: new Date().toISOString()
-      };
-
-      console.log('Grup mesajı gönderiliyor:', messageToSend);
-
-      stompClient.publish({
-        destination: '/app/group-message',
-        body: JSON.stringify(messageToSend),
-        headers: {
-          'content-type': 'application/json'
+      if (!stompClient) {
+        console.log('WebSocket bağlantısı kurulmadı, bağlantı kuruluyor...');
+        try {
+          // Bağlantı kurulmadıysa önce kur
+          const connection = await connectWebSocket();
+          if (!connection.connected) {
+            console.error('WebSocket bağlantısı kurulamadı');
+            reject(new Error('WebSocket bağlantısı kurulamadı'));
+            return;
+          }
+        } catch (err) {
+          console.error('WebSocket bağlantısı kurulamadı:', err);
+          reject(new Error('WebSocket bağlantısı kurulamadı'));
+          return;
         }
+      }
+      
+      // StompClient aktif değilse bağlantı kur
+      if (!stompClient.active) {
+        console.log('StompClient aktif değil, yeniden bağlanılıyor...');
+        stompClient.activate();
+        
+        // Bağlantı kurulana kadar bekle (maksimum 5 saniye)
+        let attempts = 0;
+        const maxAttempts = 10;
+        const waitForConnection = () => {
+          return new Promise((resolveWait, rejectWait) => {
+            const check = () => {
+              if (stompClient.active) {
+                console.log('StompClient yeniden aktif edildi');
+                resolveWait();
+              } else if (attempts >= maxAttempts) {
+                console.error(`Maksimum bağlantı denemesi (${maxAttempts}) aşıldı`);
+                rejectWait(new Error('WebSocket bağlantısı kurulamadı - zaman aşımı'));
+              } else {
+                attempts++;
+                console.log(`StompClient bağlantısı bekleniyor... (${attempts}/${maxAttempts})`);
+                setTimeout(check, 500);
+              }
+            };
+            check();
+          });
+        };
+        
+        try {
+          await waitForConnection();
+        } catch (err) {
+          console.error('StompClient aktifleştirilemedi:', err);
+          reject(err);
+          return;
+        }
+      }
+      
+      if (!stompClient.connected) {
+        console.error('WebSocket bağlantısı kurulmadı - grup mesajı gönderilemiyor');
+        reject(new Error('WebSocket bağlantısı yok'));
+        return;
+      }
+      
+      console.log(`Grup mesajı gönderiliyor: ${groupId}`);
+      
+      // Mesaj gönder
+      stompClient.publish({
+        destination: `/app/group.message.${groupId}`,
+        body: JSON.stringify({ 
+          groupId: groupId,
+          content: content,
+          type: 'MESSAGE'
+        }),
+        headers: { 'content-type': 'application/json' }
       });
-
-      resolve(messageToSend);
+      
+      console.log(`Grup ${groupId} mesajı gönderildi`);
+      resolve(true);
     } catch (error) {
       console.error('Grup mesajı gönderilirken hata:', error);
       reject(error);
@@ -1026,42 +1007,82 @@ export const sendGroupMessage = async (groupId, content) => {
 };
 
 // Bir gruba katıl
-export const joinGroup = (groupId) => {
-  return new Promise((resolve, reject) => {
-    if (!stompClient || !stompClient.connected) {
-      console.error('WebSocket bağlantısı kurulmadı - gruba katılınamıyor');
-      return reject(new Error('WebSocket bağlantısı yok'));
-    }
-
+export const joinGroup = async (groupId) => {
+  return new Promise(async (resolve, reject) => {
     try {
-      // Kullanıcı ID'sini al
-      let userId;
-      try {
-        const user = JSON.parse(localStorage.getItem('user'));
-        userId = user?.id;
-        if (!userId) {
-          throw new Error('Kullanıcı ID bulunamadı');
+      if (!stompClient) {
+        console.log('WebSocket bağlantısı kurulmadı, bağlantı kuruluyor...');
+        try {
+          // Bağlantı kurulmadıysa önce kur
+          const connection = await connectWebSocket();
+          if (!connection.connected) {
+            console.error('WebSocket bağlantısı kurulamadı');
+            reject(new Error('WebSocket bağlantısı kurulamadı'));
+            return;
+          }
+        } catch (err) {
+          console.error('WebSocket bağlantısı kurulamadı:', err);
+          reject(new Error('WebSocket bağlantısı kurulamadı'));
+          return;
         }
-      } catch (e) {
-        console.error('Kullanıcı bilgisi alınamadı:', e);
-        return reject(new Error('Kullanıcı bilgisi alınamadı'));
       }
-
-      console.log(`Kullanıcı ${userId} gruba katılıyor: ${groupId}`);
       
-      // Gruba katılma isteği gönder
-      stompClient.publish({
-        destination: '/app/join-group',
-        body: JSON.stringify({
-          userId: userId,
-          groupId: groupId
-        }),
-        headers: {
-          'content-type': 'application/json'
+      // StompClient aktif değilse bağlantı kur
+      if (!stompClient.active) {
+        console.log('StompClient aktif değil, yeniden bağlanılıyor...');
+        stompClient.activate();
+        
+        // Bağlantı kurulana kadar bekle (maksimum 5 saniye)
+        let attempts = 0;
+        const maxAttempts = 10;
+        const waitForConnection = () => {
+          return new Promise((resolveWait, rejectWait) => {
+            const check = () => {
+              if (stompClient.active) {
+                console.log('StompClient yeniden aktif edildi');
+                resolveWait();
+              } else if (attempts >= maxAttempts) {
+                console.error(`Maksimum bağlantı denemesi (${maxAttempts}) aşıldı`);
+                rejectWait(new Error('WebSocket bağlantısı kurulamadı - zaman aşımı'));
+              } else {
+                attempts++;
+                console.log(`StompClient bağlantısı bekleniyor... (${attempts}/${maxAttempts})`);
+                setTimeout(check, 500);
+              }
+            };
+            check();
+          });
+        };
+        
+        try {
+          await waitForConnection();
+        } catch (err) {
+          console.error('StompClient aktifleştirilemedi:', err);
+          reject(err);
+          return;
         }
+      }
+      
+      if (!stompClient.connected) {
+        console.error('WebSocket bağlantısı kurulmadı - gruba katılınamıyor');
+        reject(new Error('WebSocket bağlantısı yok'));
+        return;
+      }
+      
+      console.log(`Gruba katılınıyor: ${groupId}`);
+      
+      // Grup katılma mesajı gönder
+      stompClient.publish({
+        destination: `/app/group.join.${groupId}`,
+        body: JSON.stringify({ 
+          groupId: groupId,
+          type: 'JOIN'
+        }),
+        headers: { 'content-type': 'application/json' }
       });
-
-      resolve({ success: true });
+      
+      console.log(`Grup ${groupId} katılma mesajı gönderildi`);
+      resolve(true);
     } catch (error) {
       console.error('Gruba katılırken hata:', error);
       reject(error);

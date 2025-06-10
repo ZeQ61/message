@@ -2,11 +2,14 @@ package com.example.chatapp.service;
 
 import com.example.chatapp.model.Group;
 import com.example.chatapp.model.GroupMessage;
+import com.example.chatapp.model.MessageType;
 import com.example.chatapp.model.User;
 import com.example.chatapp.repository.GroupMessageRepository;
 import com.example.chatapp.repository.GroupRepository;
 import com.example.chatapp.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +23,8 @@ import java.util.Map;
 
 @Service
 public class GroupMessageService {
+
+    private static final Logger logger = LoggerFactory.getLogger(GroupMessageService.class);
 
     private final GroupMessageRepository groupMessageRepository;
     private final GroupRepository groupRepository;
@@ -149,5 +154,31 @@ public class GroupMessageService {
         }
         
         groupMessageRepository.markMessageAsDeleted(messageId);
+    }
+
+    // Yeni mesaj türü desteği için saveGroupMessage metodu ekle
+    public GroupMessage saveGroupMessage(Long groupId, Long senderId, String content, MessageType type) {
+        try {
+            // Grup ve gönderen kontrolü
+            Group group = groupRepository.findById(groupId)
+                    .orElseThrow(() -> new RuntimeException("Grup bulunamadı"));
+            
+            User sender = userRepository.findById(senderId)
+                    .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+            
+            // Kullanıcının grupta olduğunu kontrol et
+            if (!group.isMember(sender)) {
+                throw new RuntimeException("Kullanıcı bu grubun üyesi değil");
+            }
+            
+            // Yeni mesaj oluştur
+            GroupMessage message = new GroupMessage(sender, group, content, type);
+            
+            // Mesajı kaydet
+            return groupMessageRepository.save(message);
+        } catch (Exception e) {
+            logger.error("Grup mesajı kaydedilirken hata: {}", e.getMessage());
+            throw new RuntimeException("Grup mesajı kaydedilemedi: " + e.getMessage());
+        }
     }
 } 
