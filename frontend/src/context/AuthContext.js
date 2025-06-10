@@ -337,82 +337,23 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
       
-      console.log('Login isteği gönderiliyor:', username);
-      
-      // userService kullanarak istek yapma
       const response = await userService.login(username, password);
+      localStorage.setItem('token', response.data);
       
-      // Yanıt kontrolü
-      if (!response || !response.data) {
-        console.error('Geçersiz yanıt:', response);
-        throw new Error('Sunucudan geçersiz yanıt alındı');
-      }
+      const profileResponse = await userService.getProfile();
+      setUser(profileResponse.data);
       
-      console.log('Login yanıtı alındı:', response.status);
-      
-      // Token kontrol
-      const token = response.data;
-      if (!token) {
-        throw new Error('Token alınamadı');
-      }
-      
-      // Token'ı localStorage'a kaydet
-      localStorage.setItem('token', token);
-      
-      // Kullanıcı bilgilerini al
-      try {
-        // Profil bilgilerini getir
-        const profileResponse = await userService.getProfile();
-        if (!profileResponse || !profileResponse.data) {
-          throw new Error('Profil bilgileri alınamadı');
-        }
-        
-        setUser(profileResponse.data);
-        
-        // Çevrimiçi durumunu güncelle
-        await userService.updateOnlineStatus(true);
-      } catch (profileError) {
-        console.error('Profil bilgileri alınamadı:', profileError);
-        // Profil hatası login işlemini engellemesin
-      }
+      // Çevrimiçi durumunu güncelle
+      await userService.updateOnlineStatus(true);
       
       // WebSocket bağlantısı kur
-      try {
-        console.log('WebSocket bağlantısı kuruluyor...');
-        await connectWebSocket();
-        console.log('WebSocket bağlantısı kuruldu');
-      } catch (wsError) {
-        console.warn('WebSocket bağlantısı kurulamadı:', wsError);
-        // WebSocket hatası login işlemini etkilememeli
-      }
+      connectWebSocket();
       
       setLoading(false);
       return true;
-    } catch (error) {
+    } catch (err) {
       setLoading(false);
-      
-      if (error.code === 'ECONNABORTED') {
-        setError('Sunucu yanıt vermedi. Lütfen daha sonra tekrar deneyin.');
-        console.error('Login zaman aşımı:', error);
-      } else if (error.response) {
-        // Sunucudan hata yanıtı
-        const status = error.response.status;
-        if (status === 401) {
-          setError('Kullanıcı adı veya şifre hatalı');
-        } else if (status === 403) {
-          setError('Erişim reddedildi');
-        } else {
-          setError(`Giriş hatası: ${error.response.data || 'Bilinmeyen hata'}`);
-        }
-      } else if (error.request) {
-        // İstek yapıldı ama yanıt alınamadı
-        setError('Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol edin.');
-      } else {
-        // İstek yapılırken hata oluştu
-        setError(`Beklenmeyen hata: ${error.message}`);
-      }
-      
-      console.error('Login hatası:', error);
+      setError('Giriş başarısız oldu. Lütfen bilgilerinizi kontrol edin.');
       return false;
     }
   };

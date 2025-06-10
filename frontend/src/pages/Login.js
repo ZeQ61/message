@@ -10,7 +10,6 @@ const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [formError, setFormError] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
   
   const { login, error, loading } = useAuth();
   const navigate = useNavigate();
@@ -23,33 +22,11 @@ const Login = () => {
       return;
     }
     
-    try {
-      setSubmitting(true);
-      setFormError(null);
-      
-      console.log('Giriş işlemi başlatılıyor...');
-      const success = await login(username, password);
-      
-      if (success) {
-        console.log('Giriş başarılı, yönlendiriliyor...');
-        navigate('/message');
-      } else {
-        // login fonksiyonu zaten error state'i ayarladığı için
-        // burada ek bir şey yapmaya gerek yok
-        console.error('Giriş başarısız');
-      }
-    } catch (error) {
-      console.error('Giriş hatası:', error);
-      
-      if (error.code === 'ECONNABORTED') {
-        setFormError('Sunucu yanıt vermiyor. Lütfen daha sonra tekrar deneyin.');
-      } else if (error.response) {
-        setFormError(`Hata: ${error.response.data || 'Bilinmeyen hata'}`);
-      } else {
-        setFormError(`Bir hata oluştu: ${error.message}`);
-      }
-    } finally {
-      setSubmitting(false);
+    setFormError(null);
+    const success = await login(username, password);
+    
+    if (success) {
+      navigate('/message');
     }
   };
 
@@ -138,12 +115,12 @@ const Login = () => {
 
           <motion.button
             type="submit"
-            className="btn-primary"
+            className="auth-button"
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
-            disabled={submitting || loading}
+            disabled={loading}
           >
-            {loading || submitting ? 'Giriş Yapılıyor...' : 'Giriş Yap'}
+            {loading ? 'Giriş Yapılıyor...' : 'Giriş Yap'}
           </motion.button>
         </form>
 

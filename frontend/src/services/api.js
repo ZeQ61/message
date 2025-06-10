@@ -9,7 +9,7 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: true,
-  timeout: 30000, // 30 saniye (artırıldı)
+  timeout: 10000, // 10 saniye
 });
 
 // Admin API'si (ayrı bir instance)
@@ -19,7 +19,7 @@ const adminApi = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: true,
-  timeout: 30000, // 30 saniye (artırıldı)
+  timeout: 10000, // 10 saniye
 });
 
 // Normal kullanıcı istekleri için interceptor
