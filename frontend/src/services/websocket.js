@@ -1,7 +1,10 @@
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
+// Dikkat: SOCKET_URL'i backend'e doğru şekilde işaret ettiğinden emin ol
 const SOCKET_URL = 'https://backend-gq5v.onrender.com/ws';
+console.log('WebSocket URL:', SOCKET_URL);
+
 let stompClient = null;
 let statusSubscription = null;
 let friendshipSubscription = null;
@@ -9,10 +12,16 @@ let messageSubscription = null;
 let statusCallbacks = [];
 let friendshipCallbacks = [];
 let messageCallbacks = [];
+let connectAttempts = 0;
+const MAX_CONNECT_ATTEMPTS = 5;
 
 // WebSocket bağlantısını kur - Promise döndür
 export const connectWebSocket = () => {
   return new Promise((resolve, reject) => {
+    // Bağlantı deneme sayısını artır
+    connectAttempts++;
+    console.log(`WebSocket bağlantısı deneme #${connectAttempts}`);
+    
     // Mevcut bağlantıyı temizle
     if (stompClient) {
       try {
@@ -65,8 +74,21 @@ export const connectWebSocket = () => {
     }
     
     try {
+      console.log('SockJS bağlantısı oluşturuluyor:', SOCKET_URL);
       // SockJS bağlantısı kur
       const socket = new SockJS(SOCKET_URL);
+      
+      socket.onopen = () => {
+        console.log('SockJS bağlantısı açıldı');
+      };
+      
+      socket.onclose = (event) => {
+        console.log('SockJS bağlantısı kapandı:', event);
+      };
+      
+      socket.onerror = (error) => {
+        console.error('SockJS bağlantı hatası:', error);
+      };
       
       // Stomp client oluştur
       stompClient = new Client({
@@ -98,6 +120,7 @@ export const connectWebSocket = () => {
       // Bağlantı kurulduğunda yapılacak işlemler
       stompClient.onConnect = (frame) => {
         console.log('WebSocket bağlantısı kuruldu:', frame);
+        connectAttempts = 0; // Başarılı bağlantıda sayacı sıfırla
         
         try {
           // Durum değişikliklerini dinle
@@ -147,7 +170,16 @@ export const connectWebSocket = () => {
         if (stompClient && !stompClient.active) {
           const timeoutError = new Error('WebSocket bağlantısı zaman aşımına uğradı');
           console.error(timeoutError.message);
-          reject(timeoutError);
+          
+          // Maksimum deneme sayısına ulaşıldıysa, hata döndür
+          if (connectAttempts >= MAX_CONNECT_ATTEMPTS) {
+            console.error(`Maksimum bağlantı deneme sayısına (${MAX_CONNECT_ATTEMPTS}) ulaşıldı. Daha fazla denenmeyecek.`);
+            reject(timeoutError);
+          } else {
+            // Otomatik tekrar deneme
+            console.log(`Bağlantı başarısız oldu. Tekrar deneniyor... (${connectAttempts}/${MAX_CONNECT_ATTEMPTS})`);
+            connectWebSocket().then(resolve).catch(reject);
+          }
         }
       }, 15000);
       
@@ -184,6 +216,7 @@ export const disconnectWebSocket = () => {
     }
     
     stompClient = null;
+    connectAttempts = 0; // Sayacı sıfırla
   }
 };
 
