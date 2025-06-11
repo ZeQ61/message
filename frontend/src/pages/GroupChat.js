@@ -313,8 +313,20 @@ const GroupChat = () => {
     const groups = {};
     
     messages.forEach(message => {
-      const date = new Date(message.timestamp);
-      const dateStr = date.toLocaleDateString();
+      let dateStr;
+      try {
+        const date = new Date(message.timestamp);
+        
+        // Geçersiz tarih kontrolü
+        if (isNaN(date.getTime())) {
+          dateStr = "Tarih yok";
+        } else {
+          dateStr = date.toLocaleDateString();
+        }
+      } catch (error) {
+        console.error('Mesaj tarihi işlenirken hata:', error);
+        dateStr = "Tarih yok";
+      }
       
       if (!groups[dateStr]) {
         groups[dateStr] = [];
@@ -328,21 +340,51 @@ const GroupChat = () => {
   
   // Tarih formatını güzelleştir
   const formatDate = (dateStr) => {
-    const date = new Date(dateStr);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    
-    if (date.toDateString() === today.toDateString()) {
-      return 'Bugün';
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return 'Dün';
-    } else {
-      return date.toLocaleDateString('tr-TR', { 
-        day: 'numeric', 
-        month: 'long', 
-        year: 'numeric' 
-      });
+    try {
+      if (dateStr === "Tarih yok") return dateStr;
+      
+      const date = new Date(dateStr);
+      
+      // Geçersiz tarih kontrolü
+      if (isNaN(date.getTime())) {
+        return "Tarih yok";
+      }
+      
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      if (date.toDateString() === today.toDateString()) {
+        return 'Bugün';
+      } else if (date.toDateString() === yesterday.toDateString()) {
+        return 'Dün';
+      } else {
+        return date.toLocaleDateString('tr-TR', { 
+          day: 'numeric', 
+          month: 'long', 
+          year: 'numeric' 
+        });
+      }
+    } catch (error) {
+      console.error('Tarih formatlanırken hata:', error);
+      return 'Tarih yok';
+    }
+  };
+  
+  // Tarih/zaman formatını güzelleştir
+  const formatMessageTime = (timestamp) => {
+    try {
+      const date = new Date(timestamp);
+      
+      // Geçersiz tarih kontrolü
+      if (isNaN(date.getTime())) {
+        return "";
+      }
+      
+      return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    } catch (error) {
+      console.error('Mesaj zamanı formatlanırken hata:', error);
+      return "";
     }
   };
   
@@ -488,7 +530,7 @@ const GroupChat = () => {
                             )}
                             <div className="message-time">
                               <FaClock className="time-icon" />
-                              {new Date(message.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                              {formatMessageTime(message.timestamp) || ""}
                             </div>
                           </div>
                         </div>
