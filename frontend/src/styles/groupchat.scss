@@ -992,7 +992,7 @@ html[data-theme="dark"] {
         .message-item {
           &.own-message {
             .message-bubble {
-              background-color: #2a5ca3;
+              background-color: #2563EB;
               box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
               
               .message-text {
@@ -1012,7 +1012,7 @@ html[data-theme="dark"] {
           
           &.other-message {
             .message-bubble {
-              background-color: #2c2c2c;
+              background-color: #333333;
               box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
               
               .message-text {
