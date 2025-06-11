@@ -1,154 +1,167 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaComments, FaUserFriends, FaUser, FaSignOutAlt, FaBars, FaTimes, FaUsers } from 'react-icons/fa';
+import { FaHome, FaUsers, FaUserFriends, FaUserCircle, FaSignOutAlt, FaCog, FaChevronRight, FaBars } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
-import ThemeToggle from './ThemeToggle';
-import '../styles/home.scss';
-import '../styles/responsive.scss';
+import '../styles/layout.scss';
 
 const Layout = ({ children }) => {
-  const { 
-    user, 
-    logout
-  } = useAuth();
-  
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 767);
+  const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Ekran boyutu değişikliklerini takip et
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 767);
-      if (window.innerWidth > 767) {
-        setIsMobileMenuOpen(false);
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (mobile) {
+        setSidebarCollapsed(true);
       }
     };
-
+    
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Sayfa değiştiğinde mobil menüyü kapat
   useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [location.pathname]);
+    if (isMobile) {
+      setIsMenuOpen(false);
+    }
+  }, [location, isMobile]);
 
-  // Kullanıcı giriş yapmamışsa boş sayfa göster
-  if (!user) {
-    return children;
-  }
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
-  
-  // Navigation için sayfa listesi
-  const navItems = [
-    { path: '/messages', icon: <FaComments />, text: 'Mesajlar', delay: 0.2 },
-    { path: '/groups', icon: <FaUsers />, text: 'Gruplar', delay: 0.3 },
-    { path: '/friends', icon: <FaUserFriends />, text: 'Arkadaşlar', delay: 0.4 },
-    { path: '/profile', icon: <FaUser />, text: 'Profil', delay: 0.5 },
-  ];
+
+  const toggleSidebar = () => {
+    if (isMobile) {
+      setIsMenuOpen(!isMenuOpen);
+    } else {
+      setSidebarCollapsed(!isSidebarCollapsed);
+    }
+  };
+
+  const mainClass = isSidebarCollapsed ? 'main-content-expanded' : 'main-content';
 
   return (
-    <div className="home-container">
-      <ThemeToggle />
+    <div className="layout-container">
+      {isMobile && (
+        <div className="mobile-header">
+          <button className="menu-toggle" onClick={toggleSidebar}>
+            <FaBars />
+          </button>
+          <div className="app-title">Chat App</div>
+          {user && (
+            <div className="user-avatar-mobile">
+              {user.profileImageUrl ? (
+                <img src={user.profileImageUrl} alt={user.username} />
+              ) : (
+                <div className="default-avatar">{user.username?.charAt(0).toUpperCase()}</div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
-      {/* Mobil menü toggle butonu */}
-      <button 
-        className="mobile-menu-toggle" 
-        onClick={toggleMobileMenu}
-        aria-label="Toggle mobile menu"
-      >
-        {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
-      </button>
-
-      {/* Mobil overlay */}
-      <div 
-        className={`mobile-overlay ${isMobileMenuOpen ? 'active' : ''}`}
-        onClick={() => setIsMobileMenuOpen(false)}
-      ></div>
-
-      <motion.aside 
-        className={`sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}
-        initial={{ x: isMobile ? -300 : -50, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
+      <div className={`sidebar ${isSidebarCollapsed ? 'collapsed' : ''} ${isMobile && isMenuOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-header">
-          <h2>Chat App</h2>
-          {isMobile && (
-            <button 
-              className="close-mobile-menu" 
-              onClick={() => setIsMobileMenuOpen(false)}
-              aria-label="Close menu"
-            >
-              <FaTimes />
+          <h1 className="app-title">Chat App</h1>
+          {!isMobile && (
+            <button className="collapse-btn" onClick={toggleSidebar}>
+              <FaChevronRight />
             </button>
           )}
         </div>
 
-        <nav className="sidebar-nav">
-          <ul>
-            {navItems.map((item) => (
-            <motion.li 
-                key={item.path} 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: item.delay, duration: 0.3 }}
-                className={location.pathname === item.path || location.pathname.startsWith(`${item.path}/`) ? 'active' : ''}
-            >
-                <button onClick={() => navigate(item.path)}>
-                  <span style={{ marginRight: '10px' }}>{item.icon}</span> {item.text}
-              </button>
-            </motion.li>
-            ))}
-          </ul>
-        </nav>
-
-        <div className="sidebar-footer">
-          <div className="user-info">
-            <div className="user-avatar">
-              {user.profileImageUrl ? (
-                <img 
-                  src={user.profileImageUrl.startsWith('http') ? user.profileImageUrl : `https://backend-gq5v.onrender.com${user.profileImageUrl}`} 
-                  alt={`${user.username || 'Kullanıcı'} profil fotoğrafı`}
-                  crossOrigin="anonymous"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.style.display = 'none';
-                    e.target.parentNode.innerHTML = user && user.username ? user.username.charAt(0).toUpperCase() : '?';
-                  }}
-                />
-              ) : (
-                user && user.username ? user.username.charAt(0).toUpperCase() : '?'
+        {user && (
+          <>
+            <div className="user-info">
+              <div className="user-avatar">
+                {user.profileImageUrl ? (
+                  <img src={user.profileImageUrl} alt={user.username} />
+                ) : (
+                  <div className="default-avatar">{user.username?.charAt(0).toUpperCase()}</div>
+                )}
+              </div>
+              {!isSidebarCollapsed && (
+                <div className="user-details">
+                  <h3>{user.username}</h3>
+                  <div className={`status ${user.online ? 'online' : 'offline'}`}>
+                    {user.online ? 'Çevrimiçi' : 'Çevrimdışı'}
+                  </div>
+                </div>
               )}
             </div>
-            <div className="user-name">{user.isim} {user.soyad}</div>
-          </div>
-          <motion.button 
-            className="logout-btn" 
-            onClick={logout}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <FaSignOutAlt style={{ marginRight: '8px' }} /> Çıkış Yap
-          </motion.button>
-        </div>
-      </motion.aside>
 
-      <motion.main 
-        className="main-content"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5, duration: 0.5 }}
-      >
-        {children}
-      </motion.main>
+            <nav className="sidebar-nav">
+              <ul>
+                <li>
+                  <NavLink to="/home" className={({ isActive }) => isActive ? 'active' : ''}>
+                    <FaHome />
+                    {!isSidebarCollapsed && <span>Ana Sayfa</span>}
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/message" className={({ isActive }) => isActive ? 'active' : ''}>
+                    <FaUserFriends />
+                    {!isSidebarCollapsed && <span>Mesajlar</span>}
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/groups" className={({ isActive }) => isActive ? 'active' : ''}>
+                    <FaUsers />
+                    {!isSidebarCollapsed && <span>Gruplar</span>}
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/friends" className={({ isActive }) => isActive ? 'active' : ''}>
+                    <FaUserFriends />
+                    {!isSidebarCollapsed && <span>Arkadaşlar</span>}
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/profile" className={({ isActive }) => isActive ? 'active' : ''}>
+                    <FaUserCircle />
+                    {!isSidebarCollapsed && <span>Profil</span>}
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/settings" className={({ isActive }) => isActive ? 'active' : ''}>
+                    <FaCog />
+                    {!isSidebarCollapsed && <span>Ayarlar</span>}
+                  </NavLink>
+                </li>
+              </ul>
+            </nav>
+
+            <div className="sidebar-footer">
+              <button className="logout-btn" onClick={handleLogout}>
+                <FaSignOutAlt />
+                {!isSidebarCollapsed && <span>Çıkış Yap</span>}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+
+      <main className={mainClass} style={{ width: '100%', maxWidth: '100%', flex: 1 }}>
+        {isMobile && isMenuOpen && (
+          <div className="mobile-overlay" onClick={toggleSidebar}></div>
+        )}
+        <motion.div 
+          className="content-container"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          style={{ width: '100%', maxWidth: '100%', flex: 1 }}
+        >
+          {children}
+        </motion.div>
+      </main>
     </div>
   );
 };

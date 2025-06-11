@@ -22,6 +22,8 @@ $animation-speed: 0.3s;
   background-color: var(--bg-color);
   border-radius: 12px;
   box-shadow: $shadow;
+  width: 100%;
+  max-width: 100%;
   
   .group-chat-header {
     display: flex;
@@ -209,6 +211,9 @@ $animation-speed: 0.3s;
       linear-gradient(90deg, rgba(var(--primary-rgb), 0.03) 1px, transparent 1px);
     background-size: 20px 20px;
     scroll-behavior: smooth;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
     
     &::-webkit-scrollbar {
       width: 6px;
@@ -272,6 +277,8 @@ $animation-speed: 0.3s;
     }
     
     .messages-list {
+      width: 100%;
+      max-width: 100%;
       display: flex;
       flex-direction: column;
       gap: 12px;
@@ -279,7 +286,7 @@ $animation-speed: 0.3s;
       .message-item {
         display: flex;
         flex-direction: column;
-        max-width: 75%;
+        max-width: 85%;
         animation: fadeIn 0.3s ease;
         
         @keyframes fadeIn {
@@ -307,6 +314,7 @@ $animation-speed: 0.3s;
           
           .message-bubble {
             background-color: $message-bg-other;
+            color: var(--text-color);
             border-radius: 4px $border-radius-bubble $border-radius-bubble $border-radius-bubble;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.07);
           }
@@ -343,6 +351,10 @@ $animation-speed: 0.3s;
             margin-top: 4px;
             opacity: 0.8;
           }
+        }
+        
+        .message-content {
+          max-width: 100%;
         }
       }
     }
@@ -972,8 +984,12 @@ html[data-theme="dark"] {
             .message-bubble {
               background-color: $message-bg-mine-dark;
               
+              .message-text {
+                color: white;
+              }
+              
               .message-time {
-                color: $message-time-dark;
+                color: rgba(255, 255, 255, 0.8);
               }
             }
           }
@@ -981,6 +997,14 @@ html[data-theme="dark"] {
           &.other-message {
             .message-bubble {
               background-color: $message-bg-other-dark;
+              
+              .message-text {
+                color: white;
+              }
+              
+              .message-time {
+                color: rgba(255, 255, 255, 0.7);
+              }
             }
           }
         }

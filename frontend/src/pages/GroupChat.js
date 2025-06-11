@@ -423,7 +423,7 @@ const GroupChat = () => {
         )}
         
         {/* Mesaj Alanı */}
-        <div className="messages-container" ref={messagesContainerRef}>
+        <div className="messages-container" ref={messagesContainerRef} style={{ width: '100%', flex: '1' }}>
           {isLoading && messages.length === 0 ? (
             <div className="loading-messages">
               <TypingIndicator />
@@ -435,7 +435,7 @@ const GroupChat = () => {
               <p>Henüz mesaj yok. Sohbete başlamak için bir mesaj gönderin.</p>
             </div>
           ) : (
-            <div className="messages-list">
+            <div className="messages-list" style={{ width: '100%' }}>
               {Object.keys(groupedMessages).map(dateStr => (
                 <div key={dateStr} className="message-date-group">
                   <div className="date-divider">
