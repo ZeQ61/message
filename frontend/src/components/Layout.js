@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaHome, FaUsers, FaUserFriends, FaUserCircle, FaSignOutAlt, FaCog, FaChevronRight, FaBars } from 'react-icons/fa';
+import { FaUsers, FaUserFriends, FaUserCircle, FaSignOutAlt, FaChevronRight, FaBars } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import '../styles/layout.scss';
 
@@ -100,12 +100,6 @@ const Layout = ({ children }) => {
             <nav className="sidebar-nav">
               <ul>
                 <li>
-                  <NavLink to="/home" className={({ isActive }) => isActive ? 'active' : ''}>
-                    <FaHome />
-                    {!isSidebarCollapsed && <span>Ana Sayfa</span>}
-                  </NavLink>
-                </li>
-                <li>
                   <NavLink to="/message" className={({ isActive }) => isActive ? 'active' : ''}>
                     <FaUserFriends />
                     {!isSidebarCollapsed && <span>Mesajlar</span>}
@@ -127,12 +121,6 @@ const Layout = ({ children }) => {
                   <NavLink to="/profile" className={({ isActive }) => isActive ? 'active' : ''}>
                     <FaUserCircle />
                     {!isSidebarCollapsed && <span>Profil</span>}
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink to="/settings" className={({ isActive }) => isActive ? 'active' : ''}>
-                    <FaCog />
-                    {!isSidebarCollapsed && <span>Ayarlar</span>}
                   </NavLink>
                 </li>
               </ul>

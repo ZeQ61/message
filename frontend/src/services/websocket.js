@@ -182,7 +182,7 @@ export const disconnectWebSocket = () => {
   }
     
     // Bağlantıyı kapat
-    if (stompClient.active) {
+    if (stompClient && stompClient.active) {
       stompClient.deactivate();
       console.log('WebSocket bağlantısı kapatıldı');
     }

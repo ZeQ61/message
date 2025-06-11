@@ -505,8 +505,15 @@ export const AuthProvider = ({ children }) => {
       // WebSocket bağlantısını kapat
       try {
         console.log("Çıkış yaparken WebSocket bağlantısı kapatılıyor...");
-        disconnectWebSocket();
-        console.log("WebSocket bağlantısı başarıyla kapatıldı");
+        // WebSocket bağlantısını kapatmadan önce bir gecikme ekleyelim
+        setTimeout(() => {
+          try {
+            disconnectWebSocket();
+            console.log("WebSocket bağlantısı başarıyla kapatıldı");
+          } catch (innerError) {
+            console.error("WebSocket bağlantısı kapatılırken iç hata:", innerError);
+          }
+        }, 300); // 300ms gecikme
       } catch (wsError) {
         console.error("WebSocket bağlantısı kapatılırken hata:", wsError);
       }
