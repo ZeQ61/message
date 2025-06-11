@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { FaUsers, FaPaperPlane, FaImage, FaInfoCircle, FaArrowLeft, FaUserPlus } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FaUsers, FaPaperPlane, FaImage, FaInfoCircle, FaArrowLeft, FaUserPlus, FaSmile, FaLink, FaEllipsisV, FaCalendarAlt, FaClock } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import Layout from '../components/Layout';
 import Toast from '../components/Toast';
@@ -36,6 +36,7 @@ const GroupChat = () => {
   const [inviteMessage, setInviteMessage] = useState('');
   const [inviteError, setInviteError] = useState('');
   const [inviteUsername, setInviteUsername] = useState('');
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
@@ -307,6 +308,47 @@ const GroupChat = () => {
     setSearchResults([]);
   };
   
+  // Mesajı tarihe göre grupla
+  const groupMessagesByDate = (messages) => {
+    const groups = {};
+    
+    messages.forEach(message => {
+      const date = new Date(message.timestamp);
+      const dateStr = date.toLocaleDateString();
+      
+      if (!groups[dateStr]) {
+        groups[dateStr] = [];
+      }
+      
+      groups[dateStr].push(message);
+    });
+    
+    return groups;
+  };
+  
+  // Tarih formatını güzelleştir
+  const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    if (date.toDateString() === today.toDateString()) {
+      return 'Bugün';
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return 'Dün';
+    } else {
+      return date.toLocaleDateString('tr-TR', { 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric' 
+      });
+    }
+  };
+  
+  // Mesajları gruplandır
+  const groupedMessages = groupMessagesByDate(messages);
+  
   return (
     <Layout>
       <div className="group-chat-container">
@@ -343,6 +385,34 @@ const GroupChat = () => {
             >
               <FaInfoCircle />
             </button>
+            <button 
+              className="options-btn"
+              onClick={() => setShowOptionsMenu(!showOptionsMenu)}
+              title="Diğer Seçenekler"
+            >
+              <FaEllipsisV />
+            </button>
+            {showOptionsMenu && (
+              <div className="options-menu">
+                <ul>
+                  {isAdmin && (
+                    <li onClick={() => {
+                      setShowOptionsMenu(false);
+                      setShowMembersList(false);
+                      setShowInviteForm(true);
+                    }}>
+                      <FaUserPlus /> <span>Kullanıcı Davet Et</span>
+                    </li>
+                  )}
+                  <li onClick={() => {
+                    setShowOptionsMenu(false);
+                    handleLeaveGroup();
+                  }}>
+                    <span className="text-danger">Gruptan Ayrıl</span>
+                  </li>
+                </ul>
+              </div>
+            )}
           </div>
         </div>
         
@@ -366,35 +436,67 @@ const GroupChat = () => {
             </div>
           ) : (
             <div className="messages-list">
-              {messages.map((message, index) => {
-                // Medya mesajı mı kontrol et
-                const isMediaMessage = message.content && 
-                  (message.content.startsWith('{') && message.content.includes('type') && message.content.includes('url'));
-                
-                return (
-                  <div 
-                    key={message.id || index}
-                    className={`message-item ${message.isMine ? 'own-message' : 'other-message'}`}
-                  >
-                    {!message.isMine && (
-                      <div className="message-sender">
-                        {message.sender?.username || 'Kullanıcı'}
-                      </div>
-                    )}
-                    
-                    <div className="message-bubble">
-                      {isMediaMessage ? (
-                        <MediaMessage content={message.content} />
-                      ) : (
-                        <div className="message-text">{message.content}</div>
-                      )}
-                      <div className="message-time">
-                        {new Date(message.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                      </div>
+              {Object.keys(groupedMessages).map(dateStr => (
+                <div key={dateStr} className="message-date-group">
+                  <div className="date-divider">
+                    <div className="date-line"></div>
+                    <div className="date-label">
+                      <FaCalendarAlt className="date-icon" />
+                      <span>{formatDate(dateStr)}</span>
                     </div>
+                    <div className="date-line"></div>
                   </div>
-                );
-              })}
+                  
+                  {groupedMessages[dateStr].map((message, index) => {
+                    // Medya mesajı mı kontrol et
+                    const isMediaMessage = message.content && 
+                      (message.content.startsWith('{') && message.content.includes('type') && message.content.includes('url'));
+                    
+                    // Bir önceki mesaj aynı kullanıcıdan mı kontrol et
+                    const prevMessage = index > 0 ? groupedMessages[dateStr][index - 1] : null;
+                    const showSender = !prevMessage || prevMessage.sender.id !== message.sender.id;
+                    
+                    return (
+                      <div 
+                        key={message.id || index}
+                        className={`message-item ${message.isMine ? 'own-message' : 'other-message'} ${showSender ? 'with-sender' : ''}`}
+                      >
+                        {!message.isMine && showSender && (
+                          <div className="message-sender-avatar">
+                            {message.sender?.profileImageUrl ? (
+                              <img src={message.sender.profileImageUrl} alt={message.sender.username} />
+                            ) : (
+                              <div className="default-avatar">
+                                {message.sender?.username?.charAt(0).toUpperCase() || '?'}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        
+                        <div className="message-content">
+                          {!message.isMine && showSender && (
+                            <div className="message-sender">
+                              {message.sender?.username || 'Kullanıcı'}
+                            </div>
+                          )}
+                          
+                          <div className="message-bubble">
+                            {isMediaMessage ? (
+                              <MediaMessage content={message.content} />
+                            ) : (
+                              <div className="message-text">{message.content}</div>
+                            )}
+                            <div className="message-time">
+                              <FaClock className="time-icon" />
+                              {new Date(message.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
               <div ref={messagesEndRef} />
             </div>
           )}
@@ -408,6 +510,13 @@ const GroupChat = () => {
             title="Medya Ekle"
           >
             <FaImage />
+          </button>
+          
+          <button 
+            className="emoji-btn"
+            title="Emoji Ekle"
+          >
+            <FaSmile />
           </button>
           
           <textarea
@@ -428,211 +537,225 @@ const GroupChat = () => {
         </div>
         
         {/* Üyeler Listesi */}
-        {showMembersList && (
-          <motion.div 
-            className="members-sidebar"
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-          >
-            <div className="sidebar-header">
-              <h3>Grup Bilgileri</h3>
-              <button 
-                className="close-btn"
-                onClick={() => setShowMembersList(false)}
-              >
-                &times;
-              </button>
-            </div>
-            
-            <div className="group-details-section">
-              <h4>{group?.name}</h4>
-              {group?.description && <p>{group.description}</p>}
-              <p className="created-at">
-                Oluşturulma: {new Date(group?.createdAt).toLocaleDateString()}
-              </p>
-            </div>
-            
-            <div className="members-section">
-              <div className="section-header">
-                <h4>Üyeler ({members.length})</h4>
-                {isAdmin && (
-                  <button 
-                    className="invite-btn"
-                    onClick={() => {
-                      setShowMembersList(false);
-                      setShowInviteForm(true);
-                    }}
-                  >
-                    <FaUserPlus /> Davet Et
-                  </button>
-                )}
-              </div>
-              
-              <div className="members-list">
-                {members.map(member => {
-                  const isGroupAdmin = admins.some(admin => admin.id === member.id);
-                  const isCurrentUser = member.id === user?.id;
-                  
-                  return (
-                    <div key={member.id} className="member-item">
-                      <div className="member-avatar">
-                        {member.profileImageUrl ? (
-                          <img src={member.profileImageUrl} alt={member.username} />
-                        ) : (
-                          <div className="default-avatar">
-                            {member.username.charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                      </div>
-                      <div className="member-info">
-                        <span className="member-name">
-                          {member.username}
-                          {isCurrentUser && ' (Siz)'}
-                        </span>
-                        {isGroupAdmin && (
-                          <span className="admin-badge">Yönetici</span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            
-            <div className="sidebar-actions">
-              <button 
-                className="leave-group-btn"
-                onClick={handleLeaveGroup}
-              >
-                Gruptan Ayrıl
-              </button>
-            </div>
-          </motion.div>
-        )}
-        
-        {/* Kullanıcı Davet Formu */}
-        {showInviteForm && (
-          <motion.div 
-            className="modal-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
+        <AnimatePresence>
+          {showMembersList && (
             <motion.div 
-              className="modal-content"
-              initial={{ y: 50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
+              className="members-sidebar"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 20 }}
             >
-              <div className="modal-header">
-                <h2>Kullanıcı Davet Et</h2>
+              <div className="sidebar-header">
+                <h3>Grup Bilgileri</h3>
                 <button 
                   className="close-btn"
-                  onClick={() => setShowInviteForm(false)}
+                  onClick={() => setShowMembersList(false)}
                 >
                   &times;
                 </button>
               </div>
-              <form onSubmit={handleInviteUser}>
-                {inviteMessage && (
-                  <div className="success-message">{inviteMessage}</div>
-                )}
-                {inviteError && (
-                  <div className="error-message">{inviteError}</div>
-                )}
-                <div className="form-group">
-                  <label htmlFor="inviteUsername">Kullanıcı Adı *</label>
-                  <input
-                    type="text"
-                    id="inviteUsername"
-                    value={inviteUsername}
-                    onChange={handleUsernameChange}
-                    placeholder="Kullanıcı adını yazın..."
-                    autoComplete="off"
-                    required
-                  />
-                  
-                  {searchResults.length > 0 && !selectedUser && (
-                    <div className="search-results">
-                      {searchResults.map(user => (
-                        <div 
-                          key={user.id} 
-                          className="search-result-item"
-                          onClick={() => selectUserForInvite(user)}
-                        >
-                          <div className="user-avatar">
-                            {user.profileImageUrl ? (
-                              <img src={user.profileImageUrl} alt={user.username} />
-                            ) : (
-                              <div className="default-avatar">
-                                {user.username.charAt(0).toUpperCase()}
-                              </div>
-                            )}
-                          </div>
-                          <div className="user-info">
-                            <span className="username">{user.username}</span>
-                            {user.email && <span className="email">{user.email}</span>}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  
-                  {searchResults.length === 0 && inviteUsername.length >= 2 && (
-                    <div className="no-results">Kullanıcı bulunamadı</div>
+              
+              <div className="group-details-section">
+                <h4>{group?.name}</h4>
+                {group?.description && <p>{group.description}</p>}
+                <p className="created-at">
+                  <FaCalendarAlt className="icon" />
+                  Oluşturulma: {new Date(group?.createdAt).toLocaleDateString('tr-TR', { 
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                  })}
+                </p>
+              </div>
+              
+              <div className="members-section">
+                <div className="section-header">
+                  <h4>Üyeler ({members.length})</h4>
+                  {isAdmin && (
+                    <button 
+                      className="invite-btn"
+                      onClick={() => {
+                        setShowMembersList(false);
+                        setShowInviteForm(true);
+                      }}
+                    >
+                      <FaUserPlus /> Davet Et
+                    </button>
                   )}
                 </div>
                 
-                {selectedUser && (
-                  <div className="selected-user">
-                    <p>Davet edilecek kullanıcı:</p>
-                    <div className="user-details">
-                      <div className="user-avatar">
-                        {selectedUser.profileImageUrl ? (
-                          <img src={selectedUser.profileImageUrl} alt={selectedUser.username} />
-                        ) : (
-                          <div className="default-avatar">
-                            {selectedUser.username.charAt(0).toUpperCase()}
-                          </div>
-                        )}
+                <div className="members-list">
+                  {members.map(member => {
+                    const isGroupAdmin = admins.some(admin => admin.id === member.id);
+                    const isCurrentUser = member.id === user?.id;
+                    
+                    return (
+                      <div key={member.id} className="member-item">
+                        <div className="member-avatar">
+                          {member.profileImageUrl ? (
+                            <img src={member.profileImageUrl} alt={member.username} />
+                          ) : (
+                            <div className="default-avatar">
+                              {member.username.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                        <div className="member-info">
+                          <span className="member-name">
+                            {member.username}
+                            {isCurrentUser && ' (Siz)'}
+                          </span>
+                          {isGroupAdmin && (
+                            <span className="admin-badge">Yönetici</span>
+                          )}
+                        </div>
                       </div>
-                      <div className="user-info">
-                        <span className="username">{selectedUser.username}</span>
-                        {selectedUser.email && <span className="email">{selectedUser.email}</span>}
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                <div className="form-actions">
+                    );
+                  })}
+                </div>
+              </div>
+              
+              <div className="sidebar-actions">
+                <button 
+                  className="leave-group-btn"
+                  onClick={handleLeaveGroup}
+                >
+                  Gruptan Ayrıl
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
+        {/* Kullanıcı Davet Formu */}
+        <AnimatePresence>
+          {showInviteForm && (
+            <motion.div 
+              className="modal-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div 
+                className="modal-content"
+                initial={{ y: 50, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 50, opacity: 0 }}
+                transition={{ type: 'spring', damping: 25 }}
+              >
+                <div className="modal-header">
+                  <h2>Kullanıcı Davet Et</h2>
                   <button 
-                    type="button" 
-                    className="cancel-btn"
+                    className="close-btn"
                     onClick={() => setShowInviteForm(false)}
                   >
-                    İptal
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="submit-btn"
-                    disabled={isLoading || !selectedUser}
-                  >
-                    {isLoading ? 'Davet Ediliyor...' : 'Davet Et'}
+                    &times;
                   </button>
                 </div>
-              </form>
+                <form onSubmit={handleInviteUser}>
+                  {inviteMessage && (
+                    <div className="success-message">{inviteMessage}</div>
+                  )}
+                  {inviteError && (
+                    <div className="error-message">{inviteError}</div>
+                  )}
+                  <div className="form-group">
+                    <label htmlFor="inviteUsername">Kullanıcı Adı *</label>
+                    <input
+                      type="text"
+                      id="inviteUsername"
+                      value={inviteUsername}
+                      onChange={handleUsernameChange}
+                      placeholder="Kullanıcı adını yazın..."
+                      autoComplete="off"
+                      required
+                    />
+                    
+                    {searchResults.length > 0 && !selectedUser && (
+                      <div className="search-results">
+                        {searchResults.map(user => (
+                          <div 
+                            key={user.id} 
+                            className="search-result-item"
+                            onClick={() => selectUserForInvite(user)}
+                          >
+                            <div className="user-avatar">
+                              {user.profileImageUrl ? (
+                                <img src={user.profileImageUrl} alt={user.username} />
+                              ) : (
+                                <div className="default-avatar">
+                                  {user.username.charAt(0).toUpperCase()}
+                                </div>
+                              )}
+                            </div>
+                            <div className="user-info">
+                              <span className="username">{user.username}</span>
+                              {user.email && <span className="email">{user.email}</span>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {searchResults.length === 0 && inviteUsername.length >= 2 && (
+                      <div className="no-results">Kullanıcı bulunamadı</div>
+                    )}
+                  </div>
+                  
+                  {selectedUser && (
+                    <div className="selected-user">
+                      <p>Davet edilecek kullanıcı:</p>
+                      <div className="user-details">
+                        <div className="user-avatar">
+                          {selectedUser.profileImageUrl ? (
+                            <img src={selectedUser.profileImageUrl} alt={selectedUser.username} />
+                          ) : (
+                            <div className="default-avatar">
+                              {selectedUser.username.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                        <div className="user-info">
+                          <span className="username">{selectedUser.username}</span>
+                          {selectedUser.email && <span className="email">{selectedUser.email}</span>}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="form-actions">
+                    <button 
+                      type="button" 
+                      className="cancel-btn"
+                      onClick={() => setShowInviteForm(false)}
+                    >
+                      İptal
+                    </button>
+                    <button 
+                      type="submit" 
+                      className="submit-btn"
+                      disabled={isLoading || !selectedUser}
+                    >
+                      {isLoading ? 'Davet Ediliyor...' : 'Davet Et'}
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
+          )}
+        </AnimatePresence>
         
         {/* Medya Yükleme Modalı */}
-        {showMediaUploader && (
-          <MediaUploader
-            onClose={() => setShowMediaUploader(false)}
-            onUpload={handleSendMediaMessage}
-            isLoading={isLoading}
-          />
-        )}
+        <AnimatePresence>
+          {showMediaUploader && (
+            <MediaUploader
+              onClose={() => setShowMediaUploader(false)}
+              onUpload={handleSendMediaMessage}
+              isLoading={isLoading}
+            />
+          )}
+        </AnimatePresence>
         
         {/* Toast Bildirimi */}
         {toast && (

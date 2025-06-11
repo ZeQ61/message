@@ -405,7 +405,7 @@ const Profile = () => {
             </motion.button>
           </div>
         </motion.div>
-      ) :
+      ) : (
         // Profil Düzenleme Modu
         <motion.div 
           className="profile-card"
