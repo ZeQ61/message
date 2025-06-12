@@ -59,6 +59,7 @@ public class GroupMessageController {
 
     // WebSocket ile gönderilen grup mesajlarını işleme
     @MessageMapping("/group.message.{groupId}")
+    @Transactional
     public void sendGroupMessage(
             @DestinationVariable Long groupId, 
             @Payload Map<String, Object> payload,
@@ -84,8 +85,8 @@ public class GroupMessageController {
                 return;
             }
             
-            // Grup kontrolü
-            Group group = groupService.getGroupById(groupId);
+            // Grup kontrolü - Eager loading ile grup üyelerini yükle
+            Group group = groupService.getGroupByIdWithMembers(groupId);
             if (!group.isMember(sender)) {
                 logger.error("Kullanıcı {} grup {} üyesi değil, mesaj reddedildi", username, groupId);
                 return;
