@@ -28,6 +28,8 @@ public class GroupMessage {
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    // Veritabanında sadece belirli değerler kabul ediliyor, diğer değerler için MESSAGE kullanılmalı
+    // Kabul edilen değerler: MESSAGE, JOIN, LEAVE, FILE, IMAGE, VIDEO, AUDIO, SYSTEM, DIRECT, GROUP, GROUP_JOIN, GROUP_LEAVE
     private MessageType type = MessageType.MESSAGE;
 
     // Constructor
@@ -46,7 +48,35 @@ public class GroupMessage {
         this.group = group;
         this.content = content;
         this.timestamp = LocalDateTime.now();
-        this.type = type;
+        
+        // Veritabanı kısıtlaması nedeniyle, sadece kabul edilen değerleri kullan
+        // Eğer kabul edilmeyen bir değer gelirse MESSAGE olarak ayarla
+        if (isValidMessageType(type)) {
+            this.type = type;
+        } else {
+            this.type = MessageType.MESSAGE;
+        }
+    }
+    
+    // Veritabanı kısıtlamasına uygun mesaj tipleri
+    private boolean isValidMessageType(MessageType type) {
+        switch (type) {
+            case MESSAGE:
+            case JOIN:
+            case LEAVE:
+            case FILE:
+            case IMAGE:
+            case VIDEO:
+            case AUDIO:
+            case SYSTEM:
+            case DIRECT:
+            case GROUP:
+            case GROUP_JOIN:
+            case GROUP_LEAVE:
+                return true;
+            default:
+                return false;
+        }
     }
 
     // Getter ve Setter'lar
@@ -103,6 +133,11 @@ public class GroupMessage {
     }
     
     public void setType(MessageType type) {
-        this.type = type;
+        // Veritabanı kısıtlaması nedeniyle, sadece kabul edilen değerleri kullan
+        if (isValidMessageType(type)) {
+            this.type = type;
+        } else {
+            this.type = MessageType.MESSAGE;
+        }
     }
 } 
