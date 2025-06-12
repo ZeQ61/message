@@ -162,7 +162,7 @@ public class GroupMessageController {
                     groupId, 
                     user.getId(), 
                     user.getUsername() + " gruba katıldı", 
-                    MessageType.JOIN);
+                    MessageType.MESSAGE);
             
             if (joinMessage != null) {
                 logger.info("Grup katılma mesajı kaydedildi, id: {}", joinMessage.getId());

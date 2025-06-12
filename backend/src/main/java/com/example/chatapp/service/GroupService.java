@@ -370,7 +370,8 @@ public class GroupService {
         
         // Katılma mesajı oluştur
         String content = user.getUsername() + " gruba katıldı";
-        GroupMessage joinMessage = new GroupMessage(user, group, content, MessageType.GROUP_JOIN);
+        // GROUP_JOIN yerine MESSAGE tipini kullanıyoruz çünkü veritabanı kısıtlaması bunu gerektiriyor
+        GroupMessage joinMessage = new GroupMessage(user, group, content, MessageType.MESSAGE);
         groupMessageRepository.save(joinMessage);
     }
     
@@ -413,7 +414,8 @@ public class GroupService {
         
         // Ayrılma mesajı oluştur
         String content = user.getUsername() + " gruptan ayrıldı";
-        GroupMessage leaveMessage = new GroupMessage(user, group, content, MessageType.GROUP_LEAVE);
+        // GROUP_LEAVE yerine MESSAGE tipini kullanıyoruz çünkü veritabanı kısıtlaması bunu gerektiriyor
+        GroupMessage leaveMessage = new GroupMessage(user, group, content, MessageType.MESSAGE);
         groupMessageRepository.save(leaveMessage);
     }
     
