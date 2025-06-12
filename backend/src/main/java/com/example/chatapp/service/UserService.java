@@ -101,11 +101,11 @@ public class UserService {
             throw new Exception("Bu E-mail zaten var");
         }
         User user = new User();
-        user.setBio("ben " + registerRequest.getUsername());
+        user.setBio("Merhaba, ben " + registerRequest.getUsername());
         user.setCreatedAt(LocalDateTime.now());
         user.setIsim(registerRequest.getIsim());
         user.setSoyad(registerRequest.getSoyad());
-        user.setProfileImageUrl("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjYzVkNWVhIi8+PHRleHQgeD0iNTAiIHk9IjUwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGZpbGw9IiMzYzU2OGEiPj88L3RleHQ+PC9zdmc+");
+        user.setProfileImageUrl("default-avatar.png");
         user.setOnline(false);
         user.setUpdatedAt(null);
         user.setUsername(registerRequest.getUsername());
