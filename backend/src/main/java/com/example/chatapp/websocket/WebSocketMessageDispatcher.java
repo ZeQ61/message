@@ -43,6 +43,25 @@ public class WebSocketMessageDispatcher {
     }
 
     /**
+     * Grup mesajını belirtilen grubun kanalına gönderir ve Redis'e yayınlar
+     */
+    public void sendGroupMessage(Long groupId, Object message) {
+        try {
+            logger.debug("Grup mesajı gönderiliyor: groupId={}", groupId);
+            
+            // WebSocket üzerinden grup kanalına gönder
+            messagingTemplate.convertAndSend("/topic/group/" + groupId, message);
+            
+            // Redis üzerinden diğer servis instance'larına yayınla
+            redisMessagePublisher.publishGroupMessage(groupId, message);
+            
+            logger.debug("Grup mesajı başarıyla gönderildi: groupId={}", groupId);
+        } catch (Exception e) {
+            logger.error("Grup mesajı gönderilirken hata oluştu: groupId={}, hata={}", groupId, e.getMessage(), e);
+        }
+    }
+
+    /**
      * Durum mesajını tüm kullanıcılara yayınlar ve Redis'e yayınlar
      */
     public void broadcastStatusMessage(Object statusMessage) {

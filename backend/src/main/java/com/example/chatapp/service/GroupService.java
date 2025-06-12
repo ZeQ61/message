@@ -3,6 +3,8 @@ package com.example.chatapp.service;
 import com.example.chatapp.dto.GroupDTO;
 import com.example.chatapp.model.Group;
 import com.example.chatapp.model.GroupInvitation;
+import com.example.chatapp.model.GroupMessage;
+import com.example.chatapp.model.MessageType;
 import com.example.chatapp.model.User;
 import com.example.chatapp.repository.GroupInvitationRepository;
 import com.example.chatapp.repository.GroupMessageRepository;
@@ -293,6 +295,12 @@ public class GroupService {
         
         // Yeni davet oluştur
         GroupInvitation invitation = new GroupInvitation(group, invitedUser, inviter);
+        
+        // Davet mesajı oluştur
+        String content = inviter.getUsername() + ", " + invitedUser.getUsername() + " kullanıcısını gruba davet etti";
+        GroupMessage inviteMessage = new GroupMessage(inviter, group, content, MessageType.GROUP_INVITE);
+        groupMessageRepository.save(inviteMessage);
+        
         return groupInvitationRepository.save(invitation);
     }
     
@@ -318,6 +326,11 @@ public class GroupService {
         Group group = invitation.getGroup();
         group.addMember(user);
         groupRepository.save(group);
+        
+        // Katılma mesajı oluştur
+        String content = user.getUsername() + " gruba katıldı";
+        GroupMessage joinMessage = new GroupMessage(user, group, content, MessageType.GROUP_JOIN);
+        groupMessageRepository.save(joinMessage);
     }
     
     // Grup davetini reddet
@@ -356,6 +369,11 @@ public class GroupService {
         // Kullanıcıyı gruptan çıkar
         group.removeMember(user);
         groupRepository.save(group);
+        
+        // Ayrılma mesajı oluştur
+        String content = user.getUsername() + " gruptan ayrıldı";
+        GroupMessage leaveMessage = new GroupMessage(user, group, content, MessageType.GROUP_LEAVE);
+        groupMessageRepository.save(leaveMessage);
     }
     
     // Kullanıcının bekleyen grup davetlerini getir

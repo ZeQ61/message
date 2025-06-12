@@ -8,6 +8,7 @@ import com.example.chatapp.model.UserPrincipal;
 import com.example.chatapp.service.GroupMessageService;
 import com.example.chatapp.service.GroupService;
 import com.example.chatapp.service.UserService;
+import com.example.chatapp.websocket.WebSocketMessageDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,7 @@ public class GroupMessageController {
     private final GroupMessageService groupMessageService;
     private final GroupService groupService;
     private final UserService userService;
+    private final WebSocketMessageDispatcher webSocketMessageDispatcher;
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
@@ -46,16 +48,17 @@ public class GroupMessageController {
     @Autowired
     public GroupMessageController(GroupMessageService groupMessageService,
                                  GroupService groupService,
-                                 UserService userService) {
+                                 UserService userService,
+                                 WebSocketMessageDispatcher webSocketMessageDispatcher) {
         this.groupMessageService = groupMessageService;
         this.groupService = groupService;
         this.userService = userService;
+        this.webSocketMessageDispatcher = webSocketMessageDispatcher;
     }
 
     // WebSocket ile gönderilen grup mesajlarını işleme
     @MessageMapping("/group.message.{groupId}")
-    @SendTo("/topic/group-messages")
-    public GroupMessage sendGroupMessage(
+    public void sendGroupMessage(
             @DestinationVariable Long groupId, 
             @Payload Map<String, Object> payload,
             SimpMessageHeaderAccessor headerAccessor) {
@@ -71,13 +74,20 @@ public class GroupMessageController {
                 logger.info("Mesaj gönderen kullanıcı: {}", username);
             } else {
                 logger.warn("Kullanıcı bilgisi alınamadı, anonim mesaj");
-                return null; // Anonim mesajları kabul etme
+                return; // Anonim mesajları kabul etme
             }
             
             User sender = userService.findByUsername(username);
             if (sender == null) {
                 logger.error("Kullanıcı bulunamadı: {}", username);
-                return null;
+                return;
+            }
+            
+            // Grup kontrolü
+            Group group = groupService.getGroupById(groupId);
+            if (!group.isMember(sender)) {
+                logger.error("Kullanıcı {} grup {} üyesi değil, mesaj reddedildi", username, groupId);
+                return;
             }
             
             // Mesaj içeriğini al
@@ -98,21 +108,24 @@ public class GroupMessageController {
             
             if (message != null) {
                 logger.info("Grup mesajı kaydedildi, id: {}", message.getId());
-                return message;
+                
+                // Mesajı grup kanalına gönder
+                webSocketMessageDispatcher.sendGroupMessage(groupId, message);
+                
+                return;
             } else {
                 logger.error("Grup mesajı kaydedilemedi");
-                return null;
+                return;
             }
         } catch (Exception e) {
             logger.error("Grup mesajı işlenirken hata: {}", e.getMessage(), e);
-            return null;
+            return;
         }
     }
 
     // Grup katılma işlemi
     @MessageMapping("/group.join.{groupId}")
-    @SendTo("/topic/group-messages")
-    public GroupMessage joinGroup(
+    public void joinGroup(
             @DestinationVariable Long groupId,
             SimpMessageHeaderAccessor headerAccessor) {
         
@@ -126,13 +139,20 @@ public class GroupMessageController {
                 logger.info("Gruba katılan kullanıcı: {}", username);
             } else {
                 logger.warn("Kullanıcı bilgisi alınamadı, katılma işlemi iptal edildi");
-                return null;
+                return;
             }
             
             User user = userService.findByUsername(username);
             if (user == null) {
                 logger.error("Kullanıcı bulunamadı: {}", username);
-                return null;
+                return;
+            }
+            
+            // Grup kontrolü
+            Group group = groupService.getGroupById(groupId);
+            if (!group.isMember(user)) {
+                logger.error("Kullanıcı {} grup {} üyesi değil, katılma isteği reddedildi", username, groupId);
+                return;
             }
             
             // Katılma mesajı oluştur
@@ -144,14 +164,18 @@ public class GroupMessageController {
             
             if (joinMessage != null) {
                 logger.info("Grup katılma mesajı kaydedildi, id: {}", joinMessage.getId());
-                return joinMessage;
+                
+                // Mesajı grup kanalına gönder
+                webSocketMessageDispatcher.sendGroupMessage(groupId, joinMessage);
+                
+                return;
             } else {
                 logger.error("Grup katılma mesajı kaydedilemedi");
-                return null;
+                return;
             }
         } catch (Exception e) {
             logger.error("Grup katılma işlemi sırasında hata: {}", e.getMessage(), e);
-            return null;
+            return;
         }
     }
 
@@ -224,6 +248,10 @@ public class GroupMessageController {
         try {
             User currentUser = userService.findByUsername(userDetails.getUsername());
             GroupMessage message = groupMessageService.sendMessage(groupId, currentUser.getId(), content);
+            
+            // Mesajı WebSocket üzerinden grup kanalına gönder
+            webSocketMessageDispatcher.sendGroupMessage(groupId, message);
+            
             return ResponseEntity.status(HttpStatus.CREATED).body(message);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
@@ -240,6 +268,10 @@ public class GroupMessageController {
         try {
             User currentUser = userService.findByUsername(userDetails.getUsername());
             GroupMessage message = groupMessageService.sendMediaMessage(groupId, currentUser.getId(), media);
+            
+            // Mesajı WebSocket üzerinden grup kanalına gönder
+            webSocketMessageDispatcher.sendGroupMessage(groupId, message);
+            
             return ResponseEntity.status(HttpStatus.CREATED).body(message);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));

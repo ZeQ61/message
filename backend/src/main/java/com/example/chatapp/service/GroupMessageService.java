@@ -57,6 +57,7 @@ public class GroupMessageService {
         }
         
         GroupMessage message = new GroupMessage(sender, group, content);
+        message.setType(MessageType.GROUP); // Mesaj tipini grup olarak ayarla
         return groupMessageRepository.save(message);
     }
     
@@ -83,7 +84,24 @@ public class GroupMessageService {
             // Medya türüne göre içerik oluştur
             String content = String.format("{\"type\":\"%s\",\"url\":\"%s\"}", mediaType, mediaUrl);
             
-            GroupMessage message = new GroupMessage(sender, group, content);
+            // Medya türüne göre mesaj tipini belirle
+            MessageType messageType;
+            switch (mediaType.toLowerCase()) {
+                case "image":
+                    messageType = MessageType.IMAGE;
+                    break;
+                case "video":
+                    messageType = MessageType.VIDEO;
+                    break;
+                case "audio":
+                    messageType = MessageType.AUDIO;
+                    break;
+                default:
+                    messageType = MessageType.FILE;
+                    break;
+            }
+            
+            GroupMessage message = new GroupMessage(sender, group, content, messageType);
             return groupMessageRepository.save(message);
         } catch (Exception e) {
             throw new RuntimeException("Medya yüklenemedi: " + e.getMessage());
@@ -181,5 +199,38 @@ public class GroupMessageService {
             logger.error("Grup mesajı kaydedilirken hata: {}", e.getMessage());
             throw new RuntimeException("Grup mesajı kaydedilemedi: " + e.getMessage());
         }
+    }
+    
+    // Grup katılma mesajı gönder
+    @Transactional
+    public GroupMessage sendGroupJoinMessage(Long groupId, Long userId) {
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Grup bulunamadı"));
+        
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+        
+        // Kullanıcı grup üyesi mi kontrol et
+        if (!group.isMember(user)) {
+            throw new RuntimeException("Kullanıcı grup üyesi değil");
+        }
+        
+        String content = user.getUsername() + " gruba katıldı";
+        GroupMessage message = new GroupMessage(user, group, content, MessageType.GROUP_JOIN);
+        return groupMessageRepository.save(message);
+    }
+    
+    // Grup ayrılma mesajı gönder
+    @Transactional
+    public GroupMessage sendGroupLeaveMessage(Long groupId, Long userId) {
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Grup bulunamadı"));
+        
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+        
+        String content = user.getUsername() + " gruptan ayrıldı";
+        GroupMessage message = new GroupMessage(user, group, content, MessageType.GROUP_LEAVE);
+        return groupMessageRepository.save(message);
     }
 } 

@@ -790,13 +790,32 @@ const subscribeToGroupMessages = () => {
     
     console.log('Grup mesajları için abonelik başlatılıyor...');
     
-    // Genel grup mesajları için abone ol
-    groupMessageSubscription = stompClient.subscribe('/topic/group-messages', (message) => {
-      // Grup mesajını al
+    // Grup mesajları için dinamik kanal yapısına geçildi
+    // Artık her grup için /topic/group/{groupId} kanalı kullanılacak
+    // Bu nedenle genel kanal aboneliğini kaldırıyoruz
+    
+    console.log('Grup mesajları için yeni kanal yapısına geçildi - grup bazlı kanallar kullanılacak');
+    
+  } catch (error) {
+    console.error('Grup mesajlarına abone olunurken hata:', error);
+  }
+};
+
+// Belirli bir grup kanalına abone ol
+export const subscribeToGroupChannel = (groupId) => {
+  if (!stompClient || !stompClient.connected) {
+    console.error(`Grup ${groupId} kanalına abone olunamıyor - WebSocket bağlantısı yok`);
+    return ensureConnected().then(() => subscribeToGroupChannel(groupId));
+  }
+  
+  try {
+    const destination = `/topic/group/${groupId}`;
+    console.log(`Grup kanalına abone olunuyor: ${destination}`);
+    
+    const subscription = stompClient.subscribe(destination, (message) => {
       try {
         const groupMessage = JSON.parse(message.body);
-        
-        console.log('Grup mesajı alındı:', groupMessage);
+        console.log(`Grup ${groupId} mesajı alındı:`, groupMessage);
         
         // Callback'leri çağır
         groupMessageCallbacks.forEach(callback => {
@@ -811,10 +830,11 @@ const subscribeToGroupMessages = () => {
       }
     });
     
-    console.log('Grup mesajlarına başarıyla abone olundu');
-    
+    console.log(`Grup ${groupId} kanalına başarıyla abone olundu`);
+    return subscription;
   } catch (error) {
-    console.error('Grup mesajlarına abone olunurken hata:', error);
+    console.error(`Grup ${groupId} kanalına abone olunurken hata:`, error);
+    return null;
   }
 };
 
@@ -900,13 +920,13 @@ export const sendGroupMessage = async (groupId, content) => {
       
       console.log(`Grup mesajı gönderiliyor: ${groupId}`);
       
-      // Mesaj gönder
+      // Mesaj gönder - yeni kanal yapısına göre
       stompClient.publish({
         destination: `/app/group.message.${groupId}`,
         body: JSON.stringify({ 
-          groupId: groupId,
+          groupId: parseInt(groupId, 10),
           content: content,
-          type: 'MESSAGE'
+          type: 'GROUP'
         }),
         headers: { 'content-type': 'application/json' }
       });
@@ -985,11 +1005,14 @@ export const joinGroup = async (groupId) => {
       
       console.log(`Gruba katılınıyor: ${groupId}`);
       
+      // Grup kanalına abone ol
+      const subscription = await subscribeToGroupChannel(groupId);
+      
       // Grup katılma mesajı gönder
       stompClient.publish({
         destination: `/app/group.join.${groupId}`,
         body: JSON.stringify({ 
-          groupId: groupId,
+          groupId: parseInt(groupId, 10),
           type: 'JOIN'
         }),
         headers: { 'content-type': 'application/json' }

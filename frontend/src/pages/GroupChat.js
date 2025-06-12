@@ -9,7 +9,7 @@ import MediaUploader from '../components/MediaUploader';
 import MediaMessage from '../components/MediaMessage';
 import TypingIndicator from '../components/TypingIndicator';
 import groupService from '../services/groupService';
-import { addGroupMessageListener, removeGroupMessageListener, sendGroupMessage, joinGroup } from '../services/websocket';
+import WebSocketService from '../services/WebSocketService';
 import '../styles/groupchat.scss';
 import api from '../services/api';
 
@@ -77,7 +77,7 @@ const GroupChat = () => {
       setMessages(processedMessages);
       
       // WebSocket üzerinden gruba katıl
-      await joinGroup(groupId);
+      await WebSocketService.joinGroup(groupId);
     } catch (error) {
       console.error('Grup detayları getirilirken hata:', error);
       setError('Grup bilgileri yüklenirken bir hata oluştu');
@@ -93,16 +93,13 @@ const GroupChat = () => {
   
   // WebSocket üzerinden grup mesajlarını dinle
   useEffect(() => {
+    if (!groupId || !user) return;
+    
     const handleNewGroupMessage = (message) => {
-      // Mesaj bu gruba ait değilse, işleme
-      if (message.groupId !== parseInt(groupId, 10)) {
-        return;
-      }
-      
       // Mesajı işaretle (kullanıcının kendi mesajı mı?)
       const processedMessage = {
         ...message,
-        isMine: message.senderId === user?.id
+        isMine: message.sender?.id === user?.id
       };
       
       // Mesajları güncelle
@@ -112,12 +109,13 @@ const GroupChat = () => {
       scrollToBottom();
     };
     
-    // Mesaj dinleyicisini ekle
-    addGroupMessageListener(handleNewGroupMessage);
+    // Grup mesaj dinleyicisini ekle
+    WebSocketService.addGroupMessageHandler(groupId, handleNewGroupMessage);
     
     // Temizlik
     return () => {
-      removeGroupMessageListener(handleNewGroupMessage);
+      // Aboneliği kaldır
+      WebSocketService.unsubscribe(`/topic/group/${groupId}`);
     };
   }, [groupId, user]);
   
@@ -139,7 +137,7 @@ const GroupChat = () => {
     
     try {
       // Mesajı gönder
-      await sendGroupMessage(groupId, messageText);
+      await WebSocketService.sendGroupMessage(groupId, messageText);
       
       // Metin alanını temizle
       setMessageText('');

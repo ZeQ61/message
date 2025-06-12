@@ -14,6 +14,7 @@ class WebSocketService {
     this.typingHandlers = {};
     this.statusHandlers = {};
     this.notificationHandlers = {};
+    this.groupMessageHandlers = {}; // Grup mesaj işleyicileri
   }
 
   // WebSocket URL'sini düzenleyerek HTTPS desteği ekle
@@ -175,6 +176,21 @@ class WebSocketService {
     this.stompClient.send('/app/chat.sendMessage', {}, JSON.stringify(message));
   }
 
+  // Grup mesajı gönderme
+  sendGroupMessage(groupId, content) {
+    if (!this.connected) {
+      return this.connect().then(() => this.sendGroupMessage(groupId, content));
+    }
+
+    const message = {
+      groupId,
+      content,
+      type: 'GROUP'
+    };
+
+    this.stompClient.send(`/app/group.message.${groupId}`, {}, JSON.stringify(message));
+  }
+
   // Yazıyor bilgisi gönderme
   sendTypingIndicator(chatId, isTyping) {
     if (!this.connected) {
@@ -202,12 +218,53 @@ class WebSocketService {
     this.stompClient.send('/app/chat.join', {}, JSON.stringify(joinData));
   }
 
+  // Gruba katılma bildirimi gönderme
+  joinGroup(groupId) {
+    if (!this.connected) {
+      return this.connect().then(() => this.joinGroup(groupId));
+    }
+
+    const joinData = {
+      groupId,
+      type: 'JOIN'
+    };
+
+    this.stompClient.send(`/app/group.join.${groupId}`, {}, JSON.stringify(joinData));
+  }
+
   // Gelen mesaj işleyicisi ekleme
   addMessageHandler(chatId, handler) {
     if (!this.messageHandlers[chatId]) {
       this.messageHandlers[chatId] = [];
     }
     this.messageHandlers[chatId].push(handler);
+  }
+
+  // Grup mesaj işleyicisi ekleme
+  addGroupMessageHandler(groupId, handler) {
+    if (!this.groupMessageHandlers[groupId]) {
+      this.groupMessageHandlers[groupId] = [];
+    }
+    this.groupMessageHandlers[groupId].push(handler);
+    
+    // Grup kanalına abone ol
+    this.subscribeToGroupChannel(groupId);
+  }
+
+  // Grup kanalına abone ol
+  subscribeToGroupChannel(groupId) {
+    if (!this.connected) {
+      return this.connect().then(() => this.subscribeToGroupChannel(groupId));
+    }
+
+    const destination = `/topic/group/${groupId}`;
+    
+    if (!this.subscriptions[destination]) {
+      this.subscribe(destination, (message) => {
+        this.handleGroupMessage(groupId, message);
+      });
+      console.log(`Grup kanalına abone olundu: ${destination}`);
+    }
   }
 
   // Yazıyor işleyicisi ekleme
@@ -251,6 +308,28 @@ class WebSocketService {
     // İlgili chat için işleyicileri çağır
     if (this.messageHandlers[message.chatId]) {
       this.messageHandlers[message.chatId].forEach(handler => handler(message));
+    }
+  }
+
+  // Grup mesajını işleme
+  handleGroupMessage(groupId, message) {
+    // Medya mesajlarını kontrol et ve işle
+    if (message.content && message.content.startsWith('{')) {
+      try {
+        const jsonContent = JSON.parse(message.content);
+        if (jsonContent.type === 'media') {
+          message.isMedia = true;
+          message.mediaUrl = jsonContent.url;
+          message.mediaType = jsonContent.mediaType;
+        }
+      } catch (e) {
+        // JSON parse hatası, normal mesaj olarak devam et
+      }
+    }
+
+    // İlgili grup için işleyicileri çağır
+    if (this.groupMessageHandlers[groupId]) {
+      this.groupMessageHandlers[groupId].forEach(handler => handler(message));
     }
   }
 

@@ -33,6 +33,7 @@ public class RedisConfig {
     @Bean
     public RedisMessageListenerContainer redisContainer(RedisConnectionFactory connectionFactory,
                                                       MessageListenerAdapter chatMessageAdapter,
+                                                      MessageListenerAdapter groupMessageAdapter,
                                                       MessageListenerAdapter statusMessageAdapter,
                                                       MessageListenerAdapter friendshipMessageAdapter) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
@@ -40,6 +41,7 @@ public class RedisConfig {
         
         // Farklı mesaj kanalları için dinleyiciler ekle
         container.addMessageListener(chatMessageAdapter, new PatternTopic("chat:messages"));
+        container.addMessageListener(groupMessageAdapter, new PatternTopic("chat:group-messages"));
         container.addMessageListener(statusMessageAdapter, new PatternTopic("chat:status"));
         container.addMessageListener(friendshipMessageAdapter, new PatternTopic("chat:friendship"));
         
@@ -52,6 +54,14 @@ public class RedisConfig {
     @Bean
     public MessageListenerAdapter chatMessageAdapter(RedisMessageSubscriber subscriber) {
         return new MessageListenerAdapter(subscriber, "receiveChatMessage");
+    }
+
+    /**
+     * Grup mesajları için Redis dinleyici adaptörü
+     */
+    @Bean
+    public MessageListenerAdapter groupMessageAdapter(RedisMessageSubscriber subscriber) {
+        return new MessageListenerAdapter(subscriber, "receiveGroupMessage");
     }
 
     /**

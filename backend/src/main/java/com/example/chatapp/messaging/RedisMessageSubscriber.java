@@ -62,6 +62,38 @@ public class RedisMessageSubscriber {
     }
 
     /**
+     * Redis'ten gelen grup mesajlarını işler
+     */
+    public void receiveGroupMessage(String message) {
+        try {
+            // Mesaj bilgilerini ayrıştır
+            MessageEnvelope envelope = objectMapper.readValue(message, MessageEnvelope.class);
+            
+            // Eğer mesaj bu instance'dan geldiyse işleme, çünkü zaten gönderildi
+            if (instanceId.equals(envelope.getSourceInstanceId())) {
+                logger.debug("Bu instance'dan gelen grup mesajı - atlanıyor: {}", envelope.getMessageId());
+                return;
+            }
+
+            // Mesaj içeriğini JSON nesnesine dönüştür
+            Map<String, Object> messageData = objectMapper.readValue(envelope.getPayload(), Map.class);
+            
+            // Grup ID'sini al
+            Long groupId = ((Number) messageData.get("groupId")).longValue();
+            
+            // Mesajı grup kanalına ilet
+            if (groupId != null) {
+                logger.debug("Grup mesajı Redis'ten alındı, gruba gönderiliyor: {}", groupId);
+                messagingTemplate.convertAndSend("/topic/group/" + groupId, messageData);
+            } else {
+                logger.warn("Grup mesajında groupId bulunamadı, mesaj atlanıyor");
+            }
+        } catch (Exception e) {
+            logger.error("Redis'ten gelen grup mesajı işlenirken hata: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
      * Redis'ten gelen durum güncelleme mesajlarını işler
      */
     public void receiveStatusMessage(String message) {

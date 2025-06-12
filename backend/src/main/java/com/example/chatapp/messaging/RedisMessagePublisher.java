@@ -48,6 +48,32 @@ public class RedisMessagePublisher {
     }
     
     /**
+     * Grup mesajını Redis'e yayınlar
+     */
+    public void publishGroupMessage(Long groupId, Object messageData) {
+        try {
+            String channel = "chat:group-messages";
+            
+            // Mesaj içeriğini JSON'a dönüştür
+            String messagePayload = objectMapper.writeValueAsString(messageData);
+            
+            // Grup ID'sini ekle
+            messagePayload = messagePayload.substring(0, messagePayload.length() - 1) + ",\"groupId\":" + groupId + "}";
+            
+            // Mesajı zarfla
+            MessageEnvelope envelope = new MessageEnvelope(instanceId, "GROUP", messagePayload);
+            
+            // Redis'e gönder
+            String envelopeJson = objectMapper.writeValueAsString(envelope);
+            redisTemplate.convertAndSend(channel, envelopeJson);
+            
+            logger.debug("Grup mesajı Redis'e yayınlandı: kanal={}, grup={}", channel, groupId);
+        } catch (JsonProcessingException e) {
+            logger.error("Grup mesajı Redis'e yayınlanırken hata: {}", e.getMessage(), e);
+        }
+    }
+    
+    /**
      * Durum mesajını Redis'e yayınlar
      */
     public void publishStatusMessage(Object statusData) {
