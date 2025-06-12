@@ -278,42 +278,70 @@ public class GroupService {
     // Kullanıcıyı gruba davet et
     @Transactional
     public GroupInvitation inviteUserToGroup(Long groupId, Long invitedUserId, Long inviterId) {
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new RuntimeException("Grup bulunamadı"));
+        System.out.println("=== INVITE METHOD CALLED ===");
+        System.out.println("Group ID: " + groupId);
+        System.out.println("Invited User ID: " + invitedUserId);
+        System.out.println("Inviter ID: " + inviterId);
         
-        User invitedUser = userRepository.findById(invitedUserId)
-                .orElseThrow(() -> new RuntimeException("Davet edilecek kullanıcı bulunamadı"));
-        
-        User inviter = userRepository.findById(inviterId)
-                .orElseThrow(() -> new RuntimeException("Davet eden kullanıcı bulunamadı"));
-        
-        // Davet eden kişi grup üyesi olmalı
-        if (!group.isMember(inviter)) {
-            throw new RuntimeException("Sadece grup üyeleri kullanıcıları davet edebilir");
+        try {
+            Group group = groupRepository.findById(groupId)
+                    .orElseThrow(() -> new RuntimeException("Grup bulunamadı"));
+            System.out.println("Group found: " + group.getName());
+            
+            User invitedUser = userRepository.findById(invitedUserId)
+                    .orElseThrow(() -> new RuntimeException("Davet edilecek kullanıcı bulunamadı"));
+            System.out.println("Invited user found: " + invitedUser.getUsername());
+            
+            User inviter = userRepository.findById(inviterId)
+                    .orElseThrow(() -> new RuntimeException("Davet eden kullanıcı bulunamadı"));
+            System.out.println("Inviter found: " + inviter.getUsername());
+            
+            // Davet eden kişi grup üyesi olmalı
+            System.out.println("Checking if inviter is group member...");
+            if (!group.isMember(inviter)) {
+                System.out.println("Inviter is NOT a group member!");
+                throw new RuntimeException("Sadece grup üyeleri kullanıcıları davet edebilir");
+            }
+            System.out.println("Inviter is a group member");
+            
+            // Kullanıcı zaten grupta mı kontrol et
+            System.out.println("Checking if invited user is already a member...");
+            if (group.isMember(invitedUser)) {
+                System.out.println("Invited user is already a member!");
+                throw new RuntimeException("Kullanıcı zaten grubun üyesi");
+            }
+            System.out.println("Invited user is not a member yet");
+            
+            // Kullanıcı zaten davet edilmiş mi kontrol et
+            System.out.println("Checking for existing invitations...");
+            Optional<GroupInvitation> existingInvitation = groupInvitationRepository
+                    .findByGroupAndInvitedUserAndStatus(group, invitedUser, GroupInvitation.InvitationStatus.PENDING);
+            
+            if (existingInvitation.isPresent()) {
+                System.out.println("Existing invitation found!");
+                throw new RuntimeException("Bu kullanıcıya zaten davet gönderilmiş");
+            }
+            System.out.println("No existing invitation found");
+            
+            // Yeni davet oluştur
+            System.out.println("Creating new invitation...");
+            GroupInvitation invitation = new GroupInvitation(group, invitedUser, inviter);
+            
+            // Davet mesajı oluştur
+            System.out.println("Creating invite message...");
+            String content = inviter.getUsername() + ", " + invitedUser.getUsername() + " kullanıcısını gruba davet etti";
+            GroupMessage inviteMessage = new GroupMessage(inviter, group, content, MessageType.GROUP_INVITE);
+            groupMessageRepository.save(inviteMessage);
+            System.out.println("Invite message saved");
+            
+            GroupInvitation savedInvitation = groupInvitationRepository.save(invitation);
+            System.out.println("Invitation saved successfully with ID: " + savedInvitation.getId());
+            return savedInvitation;
+        } catch (Exception e) {
+            System.err.println("ERROR in inviteUserToGroup: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
         }
-        
-        // Kullanıcı zaten grupta mı kontrol et
-        if (group.isMember(invitedUser)) {
-            throw new RuntimeException("Kullanıcı zaten grubun üyesi");
-        }
-        
-        // Kullanıcı zaten davet edilmiş mi kontrol et
-        Optional<GroupInvitation> existingInvitation = groupInvitationRepository
-                .findByGroupAndInvitedUserAndStatus(group, invitedUser, GroupInvitation.InvitationStatus.PENDING);
-        
-        if (existingInvitation.isPresent()) {
-            throw new RuntimeException("Bu kullanıcıya zaten davet gönderilmiş");
-        }
-        
-        // Yeni davet oluştur
-        GroupInvitation invitation = new GroupInvitation(group, invitedUser, inviter);
-        
-        // Davet mesajı oluştur
-        String content = inviter.getUsername() + ", " + invitedUser.getUsername() + " kullanıcısını gruba davet etti";
-        GroupMessage inviteMessage = new GroupMessage(inviter, group, content, MessageType.GROUP_INVITE);
-        groupMessageRepository.save(inviteMessage);
-        
-        return groupInvitationRepository.save(invitation);
     }
     
     // Grup davetini kabul et
