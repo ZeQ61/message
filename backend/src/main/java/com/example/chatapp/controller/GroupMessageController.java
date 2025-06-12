@@ -24,6 +24,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -125,6 +126,7 @@ public class GroupMessageController {
 
     // Grup katılma işlemi
     @MessageMapping("/group.join.{groupId}")
+    @Transactional
     public void joinGroup(
             @DestinationVariable Long groupId,
             SimpMessageHeaderAccessor headerAccessor) {
@@ -148,8 +150,8 @@ public class GroupMessageController {
                 return;
             }
             
-            // Grup kontrolü
-            Group group = groupService.getGroupById(groupId);
+            // Grup kontrolü - Eager loading ile grup üyelerini yükle
+            Group group = groupService.getGroupByIdWithMembers(groupId);
             if (!group.isMember(user)) {
                 logger.error("Kullanıcı {} grup {} üyesi değil, katılma isteği reddedildi", username, groupId);
                 return;

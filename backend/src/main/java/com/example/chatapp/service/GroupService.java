@@ -91,6 +91,18 @@ public class GroupService {
                 .orElseThrow(() -> new RuntimeException("Grup bulunamadı"));
     }
     
+    // Grup detaylarını üyeleri ile birlikte getir (Eager loading)
+    @Transactional
+    public Group getGroupByIdWithMembers(Long groupId) {
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Grup bulunamadı"));
+        
+        // Hibernate proxy'yi initialize et
+        group.getMembers().size();
+        
+        return group;
+    }
+    
     // Grup üyelerini getir
     public List<User> getGroupMembers(Long groupId) {
         Group group = groupRepository.findById(groupId)
