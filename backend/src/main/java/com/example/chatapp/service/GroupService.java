@@ -330,7 +330,8 @@ public class GroupService {
             // Davet mesajı oluştur
             System.out.println("Creating invite message...");
             String content = inviter.getUsername() + ", " + invitedUser.getUsername() + " kullanıcısını gruba davet etti";
-            GroupMessage inviteMessage = new GroupMessage(inviter, group, content, MessageType.GROUP_INVITE);
+            // GROUP_INVITE yerine MESSAGE tipini kullanıyoruz çünkü veritabanı kısıtlaması bunu gerektiriyor
+            GroupMessage inviteMessage = new GroupMessage(inviter, group, content, MessageType.MESSAGE);
             groupMessageRepository.save(inviteMessage);
             System.out.println("Invite message saved");
             
