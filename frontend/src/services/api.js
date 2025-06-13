@@ -12,7 +12,7 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: true,
-  timeout: 10000, // 10 saniye
+  timeout: 30000, // 30 saniye (zaman aşımı süresini artırdım)
 });
 
 // Admin API'si (ayrı bir instance)
