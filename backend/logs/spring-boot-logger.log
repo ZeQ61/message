@@ -119,3 +119,220 @@
 2025-06-13 01:13:35,956 INFO o.s.o.j.AbstractEntityManagerFactoryBean [SpringApplicationShutdownHook] Closing JPA EntityManagerFactory for persistence unit 'default'
 2025-06-13 01:13:35,958 INFO c.z.h.HikariDataSource [SpringApplicationShutdownHook] HikariPool-1 - Shutdown initiated...
 2025-06-13 01:13:37,443 INFO c.z.h.HikariDataSource [SpringApplicationShutdownHook] HikariPool-1 - Shutdown completed.
+2025-06-13 03:25:59,321 INFO o.h.v.i.u.Version [background-preinit] HV000001: Hibernate Validator 8.0.0.Final
+2025-06-13 03:25:59,383 INFO o.s.b.StartupInfoLogger [main] Starting ChatappApplication using Java 20.0.2 with PID 22604 (C:\Users\zeki1\OneDrive\Masaüstü\message\backend\target\classes started by ZeQ in C:\Users\zeki1\OneDrive\Masaüstü\message\backend)
+2025-06-13 03:25:59,384 DEBUG o.s.b.StartupInfoLogger [main] Running with Spring Boot v3.4.5, Spring v6.2.6
+2025-06-13 03:25:59,385 INFO o.s.b.SpringApplication [main] No active profile set, falling back to 1 default profile: "default"
+2025-06-13 03:26:00,110 INFO o.s.d.r.c.RepositoryConfigurationDelegate [main] Multiple Spring Data modules found, entering strict repository configuration mode
+2025-06-13 03:26:00,112 INFO o.s.d.r.c.RepositoryConfigurationDelegate [main] Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-06-13 03:26:00,265 INFO o.s.d.r.c.RepositoryConfigurationDelegate [main] Finished Spring Data repository scanning in 145 ms. Found 8 JPA repository interfaces.
+2025-06-13 03:26:00,279 INFO o.s.d.r.c.RepositoryConfigurationDelegate [main] Multiple Spring Data modules found, entering strict repository configuration mode
+2025-06-13 03:26:00,281 INFO o.s.d.r.c.RepositoryConfigurationDelegate [main] Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-06-13 03:26:00,295 INFO o.s.d.r.c.RepositoryConfigurationExtensionSupport [main] Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.example.chatapp.repository.AdminRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-06-13 03:26:00,296 INFO o.s.d.r.c.RepositoryConfigurationExtensionSupport [main] Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.example.chatapp.repository.ChatMessageRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-06-13 03:26:00,297 INFO o.s.d.r.c.RepositoryConfigurationExtensionSupport [main] Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.example.chatapp.repository.ChatRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-06-13 03:26:00,297 INFO o.s.d.r.c.RepositoryConfigurationExtensionSupport [main] Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.example.chatapp.repository.FriendshipRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-06-13 03:26:00,298 INFO o.s.d.r.c.RepositoryConfigurationExtensionSupport [main] Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.example.chatapp.repository.GroupInvitationRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-06-13 03:26:00,298 INFO o.s.d.r.c.RepositoryConfigurationExtensionSupport [main] Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.example.chatapp.repository.GroupMessageRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-06-13 03:26:00,298 INFO o.s.d.r.c.RepositoryConfigurationExtensionSupport [main] Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.example.chatapp.repository.GroupRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-06-13 03:26:00,299 INFO o.s.d.r.c.RepositoryConfigurationExtensionSupport [main] Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.example.chatapp.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-06-13 03:26:00,299 INFO o.s.d.r.c.RepositoryConfigurationDelegate [main] Finished Spring Data repository scanning in 11 ms. Found 0 Redis repository interfaces.
+2025-06-13 03:26:00,412 INFO o.s.c.l.LogAccessor [main] No bean named 'errorChannel' has been explicitly defined. Therefore, a default PublishSubscribeChannel will be created.
+2025-06-13 03:26:00,420 INFO o.s.c.l.LogAccessor [main] No bean named 'integrationHeaderChannelRegistry' has been explicitly defined. Therefore, a default DefaultHeaderChannelRegistry will be created.
+2025-06-13 03:26:00,926 INFO o.s.b.w.e.t.TomcatWebServer [main] Tomcat initialized with port 8080 (http)
+2025-06-13 03:26:00,938 INFO o.a.j.l.DirectJDKLog [main] Initializing ProtocolHandler ["http-nio-8080"]
+2025-06-13 03:26:00,943 INFO o.a.j.l.DirectJDKLog [main] Starting service [Tomcat]
+2025-06-13 03:26:00,943 INFO o.a.j.l.DirectJDKLog [main] Starting Servlet engine: [Apache Tomcat/10.1.40]
+2025-06-13 03:26:01,014 INFO o.a.j.l.DirectJDKLog [main] Initializing Spring embedded WebApplicationContext
+2025-06-13 03:26:01,015 INFO o.s.b.w.s.c.ServletWebServerApplicationContext [main] Root WebApplicationContext: initialization completed in 1592 ms
+2025-06-13 03:26:01,135 INFO o.h.j.i.u.LogHelper [main] HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-06-13 03:26:01,177 INFO o.h.Version [main] HHH000412: Hibernate ORM core version 6.6.13.Final
+2025-06-13 03:26:01,205 INFO o.h.c.i.RegionFactoryInitiator [main] HHH000026: Second-level cache disabled
+2025-06-13 03:26:01,402 INFO o.s.o.j.p.SpringPersistenceUnitInfo [main] No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-06-13 03:26:01,431 INFO c.z.h.HikariDataSource [main] HikariPool-1 - Starting...
+2025-06-13 03:26:03,821 INFO c.z.h.p.HikariPool [main] HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@432eb882
+2025-06-13 03:26:03,823 INFO c.z.h.HikariDataSource [main] HikariPool-1 - Start completed.
+2025-06-13 03:26:04,059 WARN o.h.e.j.d.i.DialectFactoryImpl [main] HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-06-13 03:26:04,380 INFO o.h.e.j.e.i.JdbcEnvironmentInitiator [main] HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 17.5
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-06-13 03:26:05,278 INFO o.h.e.t.j.p.i.JtaPlatformInitiator [main] HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-06-13 03:26:13,992 INFO o.s.o.j.AbstractEntityManagerFactoryBean [main] Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-06-13 03:26:14,304 DEBUG o.s.w.f.GenericFilterBean [main] Filter 'corsFilter' configured for use
+2025-06-13 03:26:14,420 INFO o.s.d.j.r.q.QueryEnhancerFactory [main] Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-06-13 03:26:15,613 WARN o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration [main] spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-06-13 03:26:15,630 WARN o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer [main] Found 2 UserDetailsService beans, with names [adminDetailsServiceImpl, userDetailsServiceImpl]. Global Authentication Manager will not use a UserDetailsService for username/password login. Consider publishing a single UserDetailsService bean.
+2025-06-13 03:26:15,726 DEBUG o.s.w.s.h.SimpleUrlHandlerMapping [main] Patterns [/ws/**] in 'stompWebSocketHandlerMapping'
+2025-06-13 03:26:15,801 DEBUG o.s.w.s.h.AbstractHandlerMethodMapping [main] 55 mappings in 'requestMappingHandlerMapping'
+2025-06-13 03:26:15,835 DEBUG o.s.w.s.h.SimpleUrlHandlerMapping [main] Patterns [/webjars/**, /resources/**, /uploads/**, /user/images/**] in 'resourceHandlerMapping'
+2025-06-13 03:26:15,931 DEBUG o.s.m.h.i.AbstractMethodMessageHandler [main] 
+	c.e.c.c.AdminController:
+	
+2025-06-13 03:26:15,932 DEBUG o.s.m.h.i.AbstractMethodMessageHandler [main] 
+	c.e.c.c.ChatController:
+	
+2025-06-13 03:26:15,932 DEBUG o.s.m.h.i.AbstractMethodMessageHandler [main] 
+	c.e.c.c.FriendshipController:
+	
+2025-06-13 03:26:15,932 DEBUG o.s.m.h.i.AbstractMethodMessageHandler [main] 
+	c.e.c.c.GroupController:
+	
+2025-06-13 03:26:15,935 DEBUG o.s.m.h.i.AbstractMethodMessageHandler [main] 
+	c.e.c.c.GroupMessageController:
+	{[MESSAGE],[/group.message.{groupId}]}: sendGroupMessage(Long,Map,SimpMessageHeaderAccessor)
+	{[MESSAGE],[/group.join.{groupId}]}: joinGroup(Long,SimpMessageHeaderAccessor)
+2025-06-13 03:26:15,935 DEBUG o.s.m.h.i.AbstractMethodMessageHandler [main] 
+	c.e.c.c.MediaController:
+	
+2025-06-13 03:26:15,936 DEBUG o.s.m.h.i.AbstractMethodMessageHandler [main] 
+	c.e.c.c.UserController:
+	
+2025-06-13 03:26:15,936 DEBUG o.s.m.h.i.AbstractMethodMessageHandler [main] 
+	c.e.c.w.ChatWebSocketController:
+	{[MESSAGE],[/chat.sendMessage]}: sendMessage(ChatMessage,Principal)
+	{[MESSAGE],[/chat.join]}: joinChat(JoinChatMessage,Principal)
+2025-06-13 03:26:15,936 DEBUG o.s.m.h.i.AbstractMethodMessageHandler [main] 
+	c.e.c.w.StatusController:
+	{[MESSAGE],[/friendship]}: processFriendshipUpdate(FriendshipMessage)
+	{[MESSAGE],[/status]}: processStatusUpdate(StatusMessage)
+2025-06-13 03:26:15,937 DEBUG o.s.m.h.i.AbstractMethodMessageHandler [main] 
+	c.e.c.w.TypingIndicatorController:
+	{[MESSAGE],[/chat.typing]}: processTypingIndicator(TypingIndicator,Principal)
+2025-06-13 03:26:15,938 DEBUG o.s.m.h.i.AbstractMethodMessageHandler [main] 
+	o.s.b.a.w.s.e.BasicErrorController:
+	
+2025-06-13 03:26:15,982 DEBUG o.s.w.s.m.m.a.RequestMappingHandlerAdapter [main] ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
+2025-06-13 03:26:16,018 DEBUG o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver [main] ControllerAdvice beans: 0 @ExceptionHandler, 1 ResponseBodyAdvice
+2025-06-13 03:26:16,231 INFO o.s.c.l.LogAccessor [main] Adding {logging-channel-adapter:_org.springframework.integration.errorLogger} as a subscriber to the 'errorChannel' channel
+2025-06-13 03:26:16,232 INFO o.s.c.l.LogAccessor [main] Channel 'application.errorChannel' has 1 subscriber(s).
+2025-06-13 03:26:16,232 INFO o.s.c.l.LogAccessor [main] started bean '_org.springframework.integration.errorLogger'
+2025-06-13 03:26:16,233 DEBUG o.s.c.l.CompositeLog [main] clientOutboundChannel added SubProtocolWebSocketHandler[StompSubProtocolHandler[v10.stomp, v11.stomp, v12.stomp]]
+2025-06-13 03:26:16,233 DEBUG o.s.c.l.CompositeLog [main] clientInboundChannel added WebSocketAnnotationMethodMessageHandler[prefixes=[/app/]]
+2025-06-13 03:26:16,233 INFO o.s.c.l.CompositeLog [main] Starting...
+2025-06-13 03:26:16,233 DEBUG o.s.c.l.CompositeLog [main] clientInboundChannel added SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@73b6167d]
+2025-06-13 03:26:16,233 DEBUG o.s.c.l.CompositeLog [main] brokerChannel added SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@73b6167d]
+2025-06-13 03:26:16,234 INFO o.s.c.l.CompositeLog [main] BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@73b6167d]]
+2025-06-13 03:26:16,234 INFO o.s.c.l.CompositeLog [main] Started.
+2025-06-13 03:26:16,235 DEBUG o.s.c.l.CompositeLog [main] clientInboundChannel added UserDestinationMessageHandler[DefaultUserDestinationResolver[prefix=/user/]]
+2025-06-13 03:26:16,235 DEBUG o.s.c.l.CompositeLog [main] brokerChannel added UserDestinationMessageHandler[DefaultUserDestinationResolver[prefix=/user/]]
+2025-06-13 03:26:16,235 INFO o.a.j.l.DirectJDKLog [main] Starting ProtocolHandler ["http-nio-8080"]
+2025-06-13 03:26:16,252 INFO o.s.b.w.e.t.TomcatWebServer [main] Tomcat started on port 8080 (http) with context path '/'
+2025-06-13 03:26:17,220 INFO o.s.b.StartupInfoLogger [main] Started ChatappApplication in 18.392 seconds (process running for 18.82)
+2025-06-13 03:26:17,224 INFO c.e.c.c.DatabaseMigrationRunner [main] Veritabanı şema güncellemeleri başlatılıyor...
+2025-06-13 03:26:17,543 INFO c.e.c.c.DatabaseMigrationRunner [main] Eski kısıtlama kaldırıldı
+2025-06-13 03:26:17,714 INFO c.e.c.c.DatabaseMigrationRunner [main] Yeni kısıtlama eklendi - tüm MessageType değerleri kabul ediliyor
+2025-06-13 03:26:17,714 INFO c.e.c.c.DatabaseMigrationRunner [main] Veritabanı şema güncellemeleri başarıyla tamamlandı
+2025-06-13 03:27:16,231 INFO o.s.w.s.c.WebSocketMessageBrokerStats [MessageBroker-1] WebSocketSession[0 current WS(0)-HttpStream(0)-HttpPoll(0), 0 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(0)-CONNECTED(0)-DISCONNECT(0)], stompBrokerRelay[null], inboundChannel[unknown], outboundChannel[unknown], sockJsScheduler[pool size = 1, active threads = 1, queued tasks = 0, completed tasks = 0]
+2025-06-13 03:32:36,695 INFO o.h.v.i.u.Version [background-preinit] HV000001: Hibernate Validator 8.0.0.Final
+2025-06-13 03:32:36,759 INFO o.s.b.StartupInfoLogger [main] Starting ChatappApplication using Java 20.0.2 with PID 25448 (C:\Users\zeki1\OneDrive\Masaüstü\message\backend\target\classes started by ZeQ in C:\Users\zeki1\OneDrive\Masaüstü\message\backend)
+2025-06-13 03:32:36,760 DEBUG o.s.b.StartupInfoLogger [main] Running with Spring Boot v3.4.5, Spring v6.2.6
+2025-06-13 03:32:36,761 INFO o.s.b.SpringApplication [main] No active profile set, falling back to 1 default profile: "default"
+2025-06-13 03:32:37,406 INFO o.s.d.r.c.RepositoryConfigurationDelegate [main] Multiple Spring Data modules found, entering strict repository configuration mode
+2025-06-13 03:32:37,409 INFO o.s.d.r.c.RepositoryConfigurationDelegate [main] Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-06-13 03:32:37,545 INFO o.s.d.r.c.RepositoryConfigurationDelegate [main] Finished Spring Data repository scanning in 128 ms. Found 8 JPA repository interfaces.
+2025-06-13 03:32:37,558 INFO o.s.d.r.c.RepositoryConfigurationDelegate [main] Multiple Spring Data modules found, entering strict repository configuration mode
+2025-06-13 03:32:37,559 INFO o.s.d.r.c.RepositoryConfigurationDelegate [main] Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-06-13 03:32:37,572 INFO o.s.d.r.c.RepositoryConfigurationExtensionSupport [main] Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.example.chatapp.repository.AdminRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-06-13 03:32:37,573 INFO o.s.d.r.c.RepositoryConfigurationExtensionSupport [main] Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.example.chatapp.repository.ChatMessageRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-06-13 03:32:37,574 INFO o.s.d.r.c.RepositoryConfigurationExtensionSupport [main] Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.example.chatapp.repository.ChatRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-06-13 03:32:37,574 INFO o.s.d.r.c.RepositoryConfigurationExtensionSupport [main] Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.example.chatapp.repository.FriendshipRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-06-13 03:32:37,574 INFO o.s.d.r.c.RepositoryConfigurationExtensionSupport [main] Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.example.chatapp.repository.GroupInvitationRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-06-13 03:32:37,575 INFO o.s.d.r.c.RepositoryConfigurationExtensionSupport [main] Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.example.chatapp.repository.GroupMessageRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-06-13 03:32:37,575 INFO o.s.d.r.c.RepositoryConfigurationExtensionSupport [main] Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.example.chatapp.repository.GroupRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-06-13 03:32:37,575 INFO o.s.d.r.c.RepositoryConfigurationExtensionSupport [main] Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.example.chatapp.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-06-13 03:32:37,576 INFO o.s.d.r.c.RepositoryConfigurationDelegate [main] Finished Spring Data repository scanning in 9 ms. Found 0 Redis repository interfaces.
+2025-06-13 03:32:37,683 INFO o.s.c.l.LogAccessor [main] No bean named 'errorChannel' has been explicitly defined. Therefore, a default PublishSubscribeChannel will be created.
+2025-06-13 03:32:37,690 INFO o.s.c.l.LogAccessor [main] No bean named 'integrationHeaderChannelRegistry' has been explicitly defined. Therefore, a default DefaultHeaderChannelRegistry will be created.
+2025-06-13 03:32:38,123 INFO o.s.b.w.e.t.TomcatWebServer [main] Tomcat initialized with port 8080 (http)
+2025-06-13 03:32:38,133 INFO o.a.j.l.DirectJDKLog [main] Initializing ProtocolHandler ["http-nio-8080"]
+2025-06-13 03:32:38,135 INFO o.a.j.l.DirectJDKLog [main] Starting service [Tomcat]
+2025-06-13 03:32:38,135 INFO o.a.j.l.DirectJDKLog [main] Starting Servlet engine: [Apache Tomcat/10.1.40]
+2025-06-13 03:32:38,185 INFO o.a.j.l.DirectJDKLog [main] Initializing Spring embedded WebApplicationContext
+2025-06-13 03:32:38,192 INFO o.s.b.w.s.c.ServletWebServerApplicationContext [main] Root WebApplicationContext: initialization completed in 1381 ms
+2025-06-13 03:32:38,311 INFO o.h.j.i.u.LogHelper [main] HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-06-13 03:32:38,353 INFO o.h.Version [main] HHH000412: Hibernate ORM core version 6.6.13.Final
+2025-06-13 03:32:38,379 INFO o.h.c.i.RegionFactoryInitiator [main] HHH000026: Second-level cache disabled
+2025-06-13 03:32:38,573 INFO o.s.o.j.p.SpringPersistenceUnitInfo [main] No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-06-13 03:32:38,597 INFO c.z.h.HikariDataSource [main] HikariPool-1 - Starting...
+2025-06-13 03:32:40,602 INFO c.z.h.p.HikariPool [main] HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@50734cea
+2025-06-13 03:32:40,604 INFO c.z.h.HikariDataSource [main] HikariPool-1 - Start completed.
+2025-06-13 03:32:40,790 WARN o.h.e.j.d.i.DialectFactoryImpl [main] HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-06-13 03:32:41,126 INFO o.h.e.j.e.i.JdbcEnvironmentInitiator [main] HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 17.5
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-06-13 03:32:41,969 INFO o.h.e.t.j.p.i.JtaPlatformInitiator [main] HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-06-13 03:32:50,991 INFO o.s.o.j.AbstractEntityManagerFactoryBean [main] Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-06-13 03:32:51,281 DEBUG o.s.w.f.GenericFilterBean [main] Filter 'corsFilter' configured for use
+2025-06-13 03:32:51,393 INFO o.s.d.j.r.q.QueryEnhancerFactory [main] Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-06-13 03:32:52,570 WARN o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration [main] spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-06-13 03:32:52,585 WARN o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer [main] Found 2 UserDetailsService beans, with names [adminDetailsServiceImpl, userDetailsServiceImpl]. Global Authentication Manager will not use a UserDetailsService for username/password login. Consider publishing a single UserDetailsService bean.
+2025-06-13 03:32:52,672 DEBUG o.s.w.s.h.SimpleUrlHandlerMapping [main] Patterns [/ws/**] in 'stompWebSocketHandlerMapping'
+2025-06-13 03:32:52,748 DEBUG o.s.w.s.h.AbstractHandlerMethodMapping [main] 55 mappings in 'requestMappingHandlerMapping'
+2025-06-13 03:32:52,780 DEBUG o.s.w.s.h.SimpleUrlHandlerMapping [main] Patterns [/webjars/**, /resources/**, /uploads/**, /user/images/**] in 'resourceHandlerMapping'
+2025-06-13 03:32:52,875 DEBUG o.s.m.h.i.AbstractMethodMessageHandler [main] 
+	c.e.c.c.AdminController:
+	
+2025-06-13 03:32:52,875 DEBUG o.s.m.h.i.AbstractMethodMessageHandler [main] 
+	c.e.c.c.ChatController:
+	
+2025-06-13 03:32:52,876 DEBUG o.s.m.h.i.AbstractMethodMessageHandler [main] 
+	c.e.c.c.FriendshipController:
+	
+2025-06-13 03:32:52,876 DEBUG o.s.m.h.i.AbstractMethodMessageHandler [main] 
+	c.e.c.c.GroupController:
+	
+2025-06-13 03:32:52,879 DEBUG o.s.m.h.i.AbstractMethodMessageHandler [main] 
+	c.e.c.c.GroupMessageController:
+	{[MESSAGE],[/group.message.{groupId}]}: sendGroupMessage(Long,Map,SimpMessageHeaderAccessor)
+	{[MESSAGE],[/group.join.{groupId}]}: joinGroup(Long,SimpMessageHeaderAccessor)
+2025-06-13 03:32:52,879 DEBUG o.s.m.h.i.AbstractMethodMessageHandler [main] 
+	c.e.c.c.MediaController:
+	
+2025-06-13 03:32:52,879 DEBUG o.s.m.h.i.AbstractMethodMessageHandler [main] 
+	c.e.c.c.UserController:
+	
+2025-06-13 03:32:52,880 DEBUG o.s.m.h.i.AbstractMethodMessageHandler [main] 
+	c.e.c.w.ChatWebSocketController:
+	{[MESSAGE],[/chat.sendMessage]}: sendMessage(ChatMessage,Principal)
+	{[MESSAGE],[/chat.join]}: joinChat(JoinChatMessage,Principal)
+2025-06-13 03:32:52,880 DEBUG o.s.m.h.i.AbstractMethodMessageHandler [main] 
+	c.e.c.w.StatusController:
+	{[MESSAGE],[/status]}: processStatusUpdate(StatusMessage)
+	{[MESSAGE],[/friendship]}: processFriendshipUpdate(FriendshipMessage)
+2025-06-13 03:32:52,880 DEBUG o.s.m.h.i.AbstractMethodMessageHandler [main] 
+	c.e.c.w.TypingIndicatorController:
+	{[MESSAGE],[/chat.typing]}: processTypingIndicator(TypingIndicator,Principal)
+2025-06-13 03:32:52,881 DEBUG o.s.m.h.i.AbstractMethodMessageHandler [main] 
+	o.s.b.a.w.s.e.BasicErrorController:
+	
+2025-06-13 03:32:52,924 DEBUG o.s.w.s.m.m.a.RequestMappingHandlerAdapter [main] ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
+2025-06-13 03:32:52,971 DEBUG o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver [main] ControllerAdvice beans: 0 @ExceptionHandler, 1 ResponseBodyAdvice
+2025-06-13 03:32:53,191 INFO o.s.c.l.LogAccessor [main] Adding {logging-channel-adapter:_org.springframework.integration.errorLogger} as a subscriber to the 'errorChannel' channel
+2025-06-13 03:32:53,191 INFO o.s.c.l.LogAccessor [main] Channel 'application.errorChannel' has 1 subscriber(s).
+2025-06-13 03:32:53,192 INFO o.s.c.l.LogAccessor [main] started bean '_org.springframework.integration.errorLogger'
+2025-06-13 03:32:53,192 DEBUG o.s.c.l.CompositeLog [main] clientOutboundChannel added SubProtocolWebSocketHandler[StompSubProtocolHandler[v10.stomp, v11.stomp, v12.stomp]]
+2025-06-13 03:32:53,193 DEBUG o.s.c.l.CompositeLog [main] clientInboundChannel added WebSocketAnnotationMethodMessageHandler[prefixes=[/app/]]
+2025-06-13 03:32:53,193 INFO o.s.c.l.CompositeLog [main] Starting...
+2025-06-13 03:32:53,193 DEBUG o.s.c.l.CompositeLog [main] clientInboundChannel added SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@4c384498]
+2025-06-13 03:32:53,194 DEBUG o.s.c.l.CompositeLog [main] brokerChannel added SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@4c384498]
+2025-06-13 03:32:53,194 INFO o.s.c.l.CompositeLog [main] BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@4c384498]]
+2025-06-13 03:32:53,195 INFO o.s.c.l.CompositeLog [main] Started.
+2025-06-13 03:32:53,195 DEBUG o.s.c.l.CompositeLog [main] clientInboundChannel added UserDestinationMessageHandler[DefaultUserDestinationResolver[prefix=/user/]]
+2025-06-13 03:32:53,195 DEBUG o.s.c.l.CompositeLog [main] brokerChannel added UserDestinationMessageHandler[DefaultUserDestinationResolver[prefix=/user/]]
+2025-06-13 03:32:53,196 INFO o.a.j.l.DirectJDKLog [main] Starting ProtocolHandler ["http-nio-8080"]
+2025-06-13 03:32:53,212 INFO o.s.b.w.e.t.TomcatWebServer [main] Tomcat started on port 8080 (http) with context path '/'
+2025-06-13 03:32:54,139 INFO o.s.b.StartupInfoLogger [main] Started ChatappApplication in 17.856 seconds (process running for 18.192)
+2025-06-13 03:32:54,141 INFO c.e.c.c.DatabaseMigrationRunner [main] Veritabanı şema güncellemeleri başlatılıyor...
+2025-06-13 03:32:54,469 INFO c.e.c.c.DatabaseMigrationRunner [main] Eski kısıtlama kaldırıldı
+2025-06-13 03:32:54,656 INFO c.e.c.c.DatabaseMigrationRunner [main] Yeni kısıtlama eklendi - tüm MessageType değerleri kabul ediliyor
+2025-06-13 03:32:54,656 INFO c.e.c.c.DatabaseMigrationRunner [main] Veritabanı şema güncellemeleri başarıyla tamamlandı

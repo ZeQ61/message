@@ -23,6 +23,7 @@ com\example\chatapp\service\FriendshipService.class
 com\example\chatapp\config\UserHandshakeHandler.class
 com\example\chatapp\model\Chat.class
 com\example\chatapp\dto\ProfileResponse$Builder.class
+com\example\chatapp\model\GroupMessage$1.class
 com\example\chatapp\websocket\ChatWebSocketController$ChatMessage.class
 com\example\chatapp\websocket\ChatWebSocketController$JoinChatMessage.class
 com\example\chatapp\service\EncryptionService.class

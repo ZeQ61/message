@@ -3,3 +3,13 @@
 2025-06-13 01:13:07,139 DEBUG c.e.c.c.WebSocketConfig [main] - Uygulama hedef ön eki: /app
 2025-06-13 01:13:07,139 DEBUG c.e.c.c.WebSocketConfig [main] - Kullanıcı hedef ön eki: /user
 2025-06-13 01:13:08,105 INFO c.e.c.c.WebSocketConfig [main] WebSocket endpoint kaydedildi: /ws (SockJS ile) - CORS ayarları güncellendi
+2025-06-13 03:26:15,049 INFO c.e.c.c.WebSocketConfig [main] WebSocket mesaj brokeri yapılandırıldı:
+2025-06-13 03:26:15,052 DEBUG c.e.c.c.WebSocketConfig [main] - Broker ön ekleri: /topic, /queue, /user
+2025-06-13 03:26:15,052 DEBUG c.e.c.c.WebSocketConfig [main] - Uygulama hedef ön eki: /app
+2025-06-13 03:26:15,053 DEBUG c.e.c.c.WebSocketConfig [main] - Kullanıcı hedef ön eki: /user
+2025-06-13 03:26:15,709 INFO c.e.c.c.WebSocketConfig [main] WebSocket endpoint kaydedildi: /ws (SockJS ile) - CORS ayarları güncellendi
+2025-06-13 03:32:52,046 INFO c.e.c.c.WebSocketConfig [main] WebSocket mesaj brokeri yapılandırıldı:
+2025-06-13 03:32:52,047 DEBUG c.e.c.c.WebSocketConfig [main] - Broker ön ekleri: /topic, /queue, /user
+2025-06-13 03:32:52,047 DEBUG c.e.c.c.WebSocketConfig [main] - Uygulama hedef ön eki: /app
+2025-06-13 03:32:52,048 DEBUG c.e.c.c.WebSocketConfig [main] - Kullanıcı hedef ön eki: /user
+2025-06-13 03:32:52,655 INFO c.e.c.c.WebSocketConfig [main] WebSocket endpoint kaydedildi: /ws (SockJS ile) - CORS ayarları güncellendi

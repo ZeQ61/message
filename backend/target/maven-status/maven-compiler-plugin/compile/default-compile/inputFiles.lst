@@ -1,6 +1,7 @@
 C:\Users\zeki1\OneDrive\Masaüstü\message\backend\src\main\java\com\example\chatapp\ChatappApplication.java
 C:\Users\zeki1\OneDrive\Masaüstü\message\backend\src\main\java\com\example\chatapp\config\CloudinaryConfig.java
 C:\Users\zeki1\OneDrive\Masaüstü\message\backend\src\main\java\com\example\chatapp\config\CorsConfig.java
+C:\Users\zeki1\OneDrive\Masaüstü\message\backend\src\main\java\com\example\chatapp\config\DatabaseMigrationRunner.java
 C:\Users\zeki1\OneDrive\Masaüstü\message\backend\src\main\java\com\example\chatapp\config\JwtAuthenticationFilter.java
 C:\Users\zeki1\OneDrive\Masaüstü\message\backend\src\main\java\com\example\chatapp\config\RedisConfig.java
 C:\Users\zeki1\OneDrive\Masaüstü\message\backend\src\main\java\com\example\chatapp\config\SecurityConfig.java
