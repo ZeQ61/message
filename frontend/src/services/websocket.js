@@ -43,6 +43,15 @@ let groupMessageCallbacks = []; // Grup mesajları için callback'ler
 let connectAttempts = 0;
 const MAX_CONNECT_ATTEMPTS = 5;
 
+// Kullanıcı bilgisini her zaman güncel almak için yardımcı fonksiyon
+const getCurrentUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem('user'));
+  } catch (e) {
+    return null;
+  }
+};
+
 // WebSocket bağlantısını kur - Promise döndür
 export const connectWebSocket = () => {
   return new Promise((resolve, reject) => {
@@ -773,29 +782,17 @@ const subscribeToGroupMessages = () => {
       groupMessageSubscription.unsubscribe();
       groupMessageSubscription = null;
     }
-    
-    // Kullanıcı bilgilerini al
-    let userId;
-    try {
-      const user = JSON.parse(localStorage.getItem('user'));
-      userId = user?.id;
-      if (!userId) {
-        console.warn('Kullanıcı ID bulunamadı, grup mesaj aboneliği yapılamıyor');
-        return;
-      }
-    } catch (e) {
-      console.error('Kullanıcı bilgileri alınamadı:', e);
+
+    // Kullanıcı bilgisini her zaman güncel al
+    const user = getCurrentUser();
+    const userId = user?.id;
+    if (!userId) {
+      console.warn('Kullanıcı ID bulunamadı, grup mesaj aboneliği yapılamıyor');
       return;
     }
-    
+
     console.log('Grup mesajları için abonelik başlatılıyor...');
-    
-    // Grup mesajları için dinamik kanal yapısına geçildi
-    // Artık her grup için /topic/group/{groupId} kanalı kullanılacak
-    // Bu nedenle genel kanal aboneliğini kaldırıyoruz
-    
-    console.log('Grup mesajları için yeni kanal yapısına geçildi - grup bazlı kanallar kullanılacak');
-    
+    // Burada grup bazlı kanal aboneliği componentte yapılacak
   } catch (error) {
     console.error('Grup mesajlarına abone olunurken hata:', error);
   }
@@ -875,12 +872,10 @@ export const sendGroupMessage = async (groupId, content) => {
           return;
         }
       }
-      
       // StompClient aktif değilse bağlantı kur
       if (!stompClient.active) {
         console.log('StompClient aktif değil, yeniden bağlanılıyor...');
         stompClient.activate();
-        
         // Bağlantı kurulana kadar bekle (maksimum 5 saniye)
         let attempts = 0;
         const maxAttempts = 10;
@@ -902,7 +897,6 @@ export const sendGroupMessage = async (groupId, content) => {
             check();
           });
         };
-        
         try {
           await waitForConnection();
         } catch (err) {
@@ -911,26 +905,32 @@ export const sendGroupMessage = async (groupId, content) => {
           return;
         }
       }
-      
       if (!stompClient.connected) {
         console.error('WebSocket bağlantısı kurulmadı - grup mesajı gönderilemiyor');
         reject(new Error('WebSocket bağlantısı yok'));
         return;
       }
-      
-      console.log(`Grup mesajı gönderiliyor: ${groupId}`);
-      
+      // Kullanıcı bilgisini her zaman güncel al
+      const user = getCurrentUser();
+      if (!user || !user.id) {
+        console.error('Kullanıcı bilgisi yok, mesaj gönderilemiyor');
+        reject(new Error('Kullanıcı bilgisi yok'));
+        return;
+      }
       // Mesaj gönder - yeni kanal yapısına göre
       stompClient.publish({
         destination: `/app/group.message.${groupId}`,
         body: JSON.stringify({ 
           groupId: parseInt(groupId, 10),
           content: content,
-          type: 'GROUP'
+          type: 'GROUP',
+          senderId: user.id, // senderId'yi ekle
+          senderUsername: user.username,
+          senderName: user.isim + ' ' + user.soyad,
+          senderProfileImage: user.profileImageUrl
         }),
         headers: { 'content-type': 'application/json' }
       });
-      
       console.log(`Grup ${groupId} mesajı gönderildi`);
       resolve(true);
     } catch (error) {
@@ -1027,6 +1027,12 @@ export const joinGroup = async (groupId) => {
   });
 };
 
+// Kullanıcı değişiminde WebSocket bağlantısını otomatik kapatıp tekrar açmak için yardımcı fonksiyon
+export const refreshWebSocketOnUserChange = () => {
+  disconnectWebSocket();
+  connectWebSocket();
+};
+
 export default {
   connectWebSocket,
   disconnectWebSocket,
@@ -1046,5 +1052,6 @@ export default {
   addGroupMessageListener,
   removeGroupMessageListener,
   sendGroupMessage,
-  joinGroup
+  joinGroup,
+  refreshWebSocketOnUserChange
 }; 
