@@ -362,10 +362,7 @@ class WebSocketService {
   }
 
   // Kullanıcı değişiminde WebSocket bağlantısını yenile
-  refreshWebSocketOnUserChange() {
-    this.disconnect();
-    this.connect();
-  }
+ 
 }
 
 export default new WebSocketService(); 

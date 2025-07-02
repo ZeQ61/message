@@ -92,10 +92,7 @@ const GroupChat = () => {
   }, [fetchGroupDetails]);
   
   // Kullanıcı değiştiğinde WebSocket bağlantısını yenile
-  useEffect(() => {
-    WebSocketService.refreshWebSocketOnUserChange();
-  }, [user]);
-  
+ 
   // WebSocket üzerinden grup mesajlarını dinle
   useEffect(() => {
     if (!groupId || !user) return;

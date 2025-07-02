@@ -43,14 +43,6 @@ let groupMessageCallbacks = []; // Grup mesajları için callback'ler
 let connectAttempts = 0;
 const MAX_CONNECT_ATTEMPTS = 5;
 
-// Kullanıcı bilgisini her zaman güncel almak için yardımcı fonksiyon
-const getCurrentUser = () => {
-  try {
-    return JSON.parse(localStorage.getItem('user'));
-  } catch (e) {
-    return null;
-  }
-};
 
 // WebSocket bağlantısını kur - Promise döndür
 export const connectWebSocket = () => {
