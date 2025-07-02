@@ -360,6 +360,12 @@ class WebSocketService {
       this.notificationHandlers.friendship.forEach(handler => handler(data));
     }
   }
+
+  // Kullanıcı değişiminde WebSocket bağlantısını yenile
+  refreshWebSocketOnUserChange() {
+    this.disconnect();
+    this.connect();
+  }
 }
 
 export default new WebSocketService(); 
