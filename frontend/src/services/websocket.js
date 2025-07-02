@@ -43,14 +43,6 @@ let groupMessageCallbacks = []; // Grup mesajları için callback'ler
 let connectAttempts = 0;
 const MAX_CONNECT_ATTEMPTS = 5;
 
-// Kullanıcı bilgisini her zaman güncel almak için yardımcı fonksiyon
-const getCurrentUser = () => {
-  try {
-    return JSON.parse(localStorage.getItem('user'));
-  } catch (e) {
-    return null;
-  }
-};
 
 // WebSocket bağlantısını kur - Promise döndür
 export const connectWebSocket = () => {
@@ -783,11 +775,17 @@ const subscribeToGroupMessages = () => {
       groupMessageSubscription = null;
     }
 
-    // Kullanıcı bilgisini her zaman güncel al
-    const user = getCurrentUser();
-    const userId = user?.id;
-    if (!userId) {
-      console.warn('Kullanıcı ID bulunamadı, grup mesaj aboneliği yapılamıyor');
+    // Kullanıcı bilgilerini al
+    let userId;
+    try {
+      const user = JSON.parse(localStorage.getItem('user'));
+      userId = user?.id;
+      if (!userId) {
+        console.warn('Kullanıcı ID bulunamadı, grup mesaj aboneliği yapılamıyor');
+        return;
+      }
+    } catch (e) {
+      console.error('Kullanıcı bilgileri alınamadı:', e);
       return;
     }
 
@@ -910,24 +908,13 @@ export const sendGroupMessage = async (groupId, content) => {
         reject(new Error('WebSocket bağlantısı yok'));
         return;
       }
-      // Kullanıcı bilgisini her zaman güncel al
-      const user = getCurrentUser();
-      if (!user || !user.id) {
-        console.error('Kullanıcı bilgisi yok, mesaj gönderilemiyor');
-        reject(new Error('Kullanıcı bilgisi yok'));
-        return;
-      }
       // Mesaj gönder - yeni kanal yapısına göre
       stompClient.publish({
         destination: `/app/group.message.${groupId}`,
         body: JSON.stringify({ 
           groupId: parseInt(groupId, 10),
           content: content,
-          type: 'GROUP',
-          senderId: user.id, // senderId'yi ekle
-          senderUsername: user.username,
-          senderName: user.isim + ' ' + user.soyad,
-          senderProfileImage: user.profileImageUrl
+          type: 'GROUP'
         }),
         headers: { 'content-type': 'application/json' }
       });
@@ -1027,12 +1014,6 @@ export const joinGroup = async (groupId) => {
   });
 };
 
-// Kullanıcı değişiminde WebSocket bağlantısını otomatik kapatıp tekrar açmak için yardımcı fonksiyon
-export const refreshWebSocketOnUserChange = () => {
-  disconnectWebSocket();
-  connectWebSocket();
-};
-
 export default {
   connectWebSocket,
   disconnectWebSocket,
@@ -1052,6 +1033,5 @@ export default {
   addGroupMessageListener,
   removeGroupMessageListener,
   sendGroupMessage,
-  joinGroup,
-  refreshWebSocketOnUserChange
+  joinGroup
 }; 
