@@ -88,7 +88,7 @@ public class UserController {
     public ResponseEntity<Resource> getImage(@PathVariable String fileName) {
         Resource file = userService.loadImageAsResource(fileName);
         
-        // MIME türünü dosya uzantısına göre belirleme
+        // MIME türünü dosya uzantısına göre belirlemeeeee
         String contentType = "image/jpeg"; // Varsayılan olarak JPEG
         
         String filename = file.getFilename();
