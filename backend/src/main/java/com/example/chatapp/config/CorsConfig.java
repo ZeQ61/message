@@ -8,6 +8,8 @@ import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.Arrays;
+
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
 
@@ -20,26 +22,27 @@ public class CorsConfig implements WebMvcConfigurer {
                 .exposedHeaders("Authorization")
                 .allowCredentials(true)
                 .maxAge(3600);
-
-        System.out.println("CORS configuration applied for specific origins");
     }
-    
+
     @Bean
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-        
-        config.addAllowedOrigin("https://frontend-gamma-six-67.vercel.app");
-        config.addAllowedOrigin("http://localhost:3000");
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
+
+        config.setAllowedOrigins(Arrays.asList(
+                "https://frontend-gamma-six-67.vercel.app",
+                "http://localhost:3000"
+        ));
+        config.setAllowedHeaders(Arrays.asList("*"));
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        config.setExposedHeaders(Arrays.asList("Authorization"));
         config.setAllowCredentials(true);
-        
+        config.setMaxAge(3600L);
+
         source.registerCorsConfiguration("/**", config);
         source.registerCorsConfiguration("/ws/**", config);
         source.registerCorsConfiguration("/api/**", config);
-        
+
         return new CorsFilter(source);
     }
 }
-
