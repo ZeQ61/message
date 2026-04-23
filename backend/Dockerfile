@@ -1,5 +1,5 @@
 # Maven + Java içeren bir temel imaj kullan
-FROM maven:3.8-openjdk-17 as build
+FROM maven:3.8-openjdk-17 AS build
 
 # Uygulama kodunu kopyala
 COPY . /app
@@ -9,7 +9,7 @@ WORKDIR /app
 RUN mvn clean package -DskipTests
 
 # Daha hafif bir Java imajına geç
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jre-jammy
 
 # .jar dosyasını kopyala
 COPY --from=build /app/target/message-0.0.1-SNAPSHOT.jar app.jar
