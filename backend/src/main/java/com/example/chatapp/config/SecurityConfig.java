@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,7 +23,6 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
@@ -34,7 +34,7 @@ public class SecurityConfig {
     @Autowired
     @Qualifier("userDetailsServiceImpl")
     private UserDetailsServiceImpl userDetailsService;
-    
+
     @Autowired
     @Qualifier("adminDetailsServiceImpl")
     private AdminDetailsServiceImpl adminDetailsService;
@@ -42,50 +42,55 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf().disable()
-            .authorizeHttpRequests()
-            // Public endpoints
-            .requestMatchers("/user/login", "/user/register").permitAll()
-            .requestMatchers("/admin/login", "/admin/register").permitAll()
-            // WebSocket endpoint'leri için izin
-            .requestMatchers("/ws/**").permitAll()
-            .requestMatchers("/ws/info").permitAll()
-            // Dosyalara erişim için daha kapsamlı izinler
-            .requestMatchers("/user/images/**").permitAll()
-            .requestMatchers("/uploads/**").permitAll()
-            // Diğer dosya erişim yolları için izinler
-            .requestMatchers("/resources/**", "/static/**", "/images/**").permitAll()
-            // Profil resmi düzeltme endpoint'i
-            .requestMatchers("/api/users/fix-profile-images").permitAll()
-            // Kullanıcı arama endpoint'i
-            .requestMatchers("/user/users/search").permitAll()
-            // Other endpoints requires authentication
-            .anyRequest().authenticated()
-            .and()
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and()
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        // OPTIONS preflight isteklerini her zaman izin ver
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // Public endpoints
+                        .requestMatchers("/user/login", "/user/register").permitAll()
+                        .requestMatchers("/admin/login", "/admin/register").permitAll()
+                        // WebSocket
+                        .requestMatchers("/ws/**", "/ws/info").permitAll()
+                        // Dosya erişimi
+                        .requestMatchers("/user/images/**", "/uploads/**").permitAll()
+                        .requestMatchers("/resources/**", "/static/**", "/images/**").permitAll()
+                        // Diğer public endpointler
+                        .requestMatchers("/api/users/fix-profile-images").permitAll()
+                        .requestMatchers("/user/users/search").permitAll()
+                        // Geri kalan her şey authentication gerektirir
+                        .anyRequest().authenticated()
+                )
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(
+        CorsConfiguration config = new CorsConfiguration();
+
+        config.setAllowedOrigins(Arrays.asList(
                 "https://frontend-gamma-six-67.vercel.app",
                 "http://localhost:3000"
         ));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setExposedHeaders(Arrays.asList("Authorization"));
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
+
+        config.setAllowedMethods(Arrays.asList(
+                "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
+        ));
+
+        // ÖNEMLİ: Liste yerine addAllowedHeader kullan
+        config.addAllowedHeader("*");
+
+        config.setExposedHeaders(Arrays.asList("Authorization"));
+        config.setAllowCredentials(true);
+        config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        source.registerCorsConfiguration("/ws/**", configuration);
+        source.registerCorsConfiguration("/**", config);
         return source;
     }
 
@@ -98,21 +103,16 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
-    
+
     @Bean
     public WebMvcConfigurer securityResourceConfigurer() {
-        return new WebMvcConfigurer() {            
+        return new WebMvcConfigurer() {
             @Override
             public void addResourceHandlers(ResourceHandlerRegistry registry) {
-                // Yükleme dizinine doğrudan erişim
                 registry.addResourceHandler("/uploads/**")
                         .addResourceLocations("file:uploads/");
-                        
-                // Kullanıcı resimlerine özel erişim
                 registry.addResourceHandler("/user/images/**")
                         .addResourceLocations("file:uploads/images/");
-                        
-                System.out.println("Resource handlers configured for: /uploads/ and /user/images/");
             }
         };
     }
